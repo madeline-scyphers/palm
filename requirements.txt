@@ -1,0 +1,7 @@
+pyyaml
+numpy
+pandas
+attrs
+
+# development
+pytest

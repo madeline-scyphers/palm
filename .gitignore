@@ -1,3 +1,11 @@
+# Palm code
+current_version/
+
+
+#################################################
+# Various Python files for different work flows #
+#################################################
+
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]
