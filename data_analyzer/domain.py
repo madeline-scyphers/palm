@@ -25,7 +25,7 @@ class House(BaseDomainArea):
         self.matrix = self.get_matrix()
 
     def get_matrix(self) -> np.ndarray:
-        house = self.z * np.ones((self.x, self.y))
+        house = self.z * np.ones((self.y, self.x))
         return house
 
 
@@ -41,7 +41,7 @@ class Cell(BaseDomainArea):
     def get_matrix(self) -> np.ndarray:
         left = (self.x - self.house.x) // 2
         top = (self.y - self.house.y) // 2
-        plot =  np.zeros((self.x, self.y))
+        plot =  np.zeros((self.y, self.x))
         plot[top:top + self.house.y, left:left + self.house.x] = self.house.matrix
         
         return plot
