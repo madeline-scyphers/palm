@@ -17,4 +17,3 @@ def get_factors_rev(n: int) -> Iterator[int]:
         if n % i == 0:
             for num in [i, n//i]:
                 yield num
-
