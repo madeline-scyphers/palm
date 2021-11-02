@@ -1,6 +1,8 @@
 # Palm code
 current_version/
-
+data_analyzer/input
+*.nc
+*static
 
 #################################################
 # Various Python files for different work flows #

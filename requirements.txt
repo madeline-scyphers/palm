@@ -1,7 +1,8 @@
 pyyaml
 numpy
 pandas
-attrs
+scipy
+netCDF4
 
 # development
 pytest

@@ -8,7 +8,7 @@ class BaseDomainArea(ABC):
     subplot: Optional["BaseDomainArea"]
     x: int
     y: int
-    y: Optional[int]
+    z: Optional[int]
     matrix: np.ndarray
 
     def __str__(self) -> str:
@@ -38,25 +38,56 @@ class House(BaseDomainArea):
         self.matrix = self.get_matrix()
 
     def get_matrix(self) -> np.ndarray:
-        house = self.z * np.full((self.y, self.x), self.z)
+        house = np.full((self.y, self.x), self.z)
         return house
 
 
 class Cell(BaseDomainArea):
-    def __init__(self, subplot: House, x: int, y: int) -> None:
+    def __init__(self, subplot: House, x: int, y: int, tree_domain_fraction: int) -> None:
         self.subplot = subplot
         self.x = x
         self.y = y
+        self.tree_domain_fraction = tree_domain_fraction
         self._validate_matrix_size(subplot=self.subplot)
         self.matrix = self.get_matrix()
+        self.trees = self.get_trees()
 
     def get_matrix(self) -> np.ndarray:
         left = (self.x - self.subplot.x) // 2
         top = (self.y - self.subplot.y) // 2
-        plot =  np.zeros((self.y, self.x))
+        plot =  np.zeros((self.y, self.x), dtype=int)
         plot[top:top + self.subplot.y, left:left + self.subplot.x] = self.subplot.matrix
         
         return plot
+    
+    def calc_perimeter(self, offset: int):
+        # offset = 4
+        inset_min, inset_max = offset, self.matrix.shape[0] - offset
+        return 2 * self.matrix[inset_min:inset_max, 1].size + 2 * (self.matrix[1, inset_min:inset_max].size - 2)
+
+    def get_trees(self):
+        no_of_trees = self.matrix.size // self.tree_domain_fraction
+        perimeter = self.calc_perimeter(self.x)
+        offset = 0
+        for offset_temp in range(0, (self.x - self.subplot.x) // 2):
+            perim = self.calc_perimeter(offset_temp)
+            if perim < no_of_trees:
+                break
+            perimeter = perim
+            offset = offset_temp
+        fence_edge = self.x - offset * 2
+        trees_fence = self.set_fence(offset, perimeter, no_of_trees)
+        return trees_fence
+
+    def set_fence(self, offset, perimeter, no_of_trees):
+        a = np.zeros((self.x, self.y), dtype=int)
+        a[(offset, self.x-offset -1), offset:self.x-offset] = 1
+        a[offset:self.x-offset, (offset, self.x-offset -1)] = 1
+        perim_locations = np.linspace(0, perimeter, num=no_of_trees, endpoint=False, dtype=int)
+        perim_inds = np.where(a[a == 1])[0]
+        a[a == 1] = np.where(np.isin(perim_inds, perim_locations), 1, 0)
+        return a
+
 
 class Domain(BaseDomainArea):
     def __init__(self, subplot: Cell, x: int, y: int) -> None:
@@ -64,15 +95,29 @@ class Domain(BaseDomainArea):
         self.x = x
         self.y = y
         self._validate_matrix_size(subplot=self.subplot)
-        self.matrix = self.get_matrix()
+        self.matrix, self.trees_matrix = self.get_matrix()
+        assert (self.x * self.y) // self.subplot.tree_domain_fraction == self.trees_matrix.sum(), (
+            f"Number of trees in trees matrix {self.trees_matrix} not expected number of trees: "
+            f"{(self.x * self.y) // self.subplot.tree_domain_fraction}")
+        
+    
+    def print_tree_matrix(self) -> str:
+        string = ""
+        for row in self.trees_matrix:
+            string += f'{" ".join(str(int(pixel)) for pixel in row)}\n'
+        return string
 
     def get_matrix(self) -> np.ndarray:
-        domain = np.tile(self.subplot.matrix, (self.y // self.subplot.matrix.shape[0], self.x // self.subplot.matrix.shape[1]))
-        return domain
+        domain = np.tile(self.subplot.matrix, 
+                         (self.y // self.subplot.matrix.shape[0], self.x // self.subplot.matrix.shape[1]))
+        domain_trees = np.tile(self.subplot.trees, 
+                               (self.y // self.subplot.matrix.shape[0], self.x // self.subplot.matrix.shape[1]))
+        
+        return domain, domain_trees
 
     @classmethod
-    def from_domain_config(cls, house, config, consts):
-        cell = Cell(house, **config["plot_size"])
-        x = consts["domain"]["x"]
-        y = consts["domain"]["y"]
+    def from_domain_config(cls, house, config):
+        cell = Cell(house, tree_domain_fraction=config["trees"]["domain_fraction"], **config["plot_size"])
+        x = config["domain"]["x"]
+        y = config["domain"]["y"]
         return cls(subplot=cell, x=x, y=y)
