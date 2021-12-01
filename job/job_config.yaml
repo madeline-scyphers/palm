@@ -9,7 +9,7 @@ domain:
   z_scale: 5
 
 plot_size:
-  x: 8
+  x: 4
   y: 8
 
 # total_house_size: 5184  # 1 quarter of domain

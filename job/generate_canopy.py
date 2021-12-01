@@ -1,4 +1,3 @@
-import netCDF4
 import numpy as np
 from pathlib import Path
 
@@ -19,9 +18,9 @@ def get_new_lad(old_lad, tree_matrix, **kwargs):
     return new_lad
 
 
-def copy_netcdf(job_name, **kwargs):
+def get_lad_netcdf(job_name, **kwargs):
     ds: Dataset = xr.open_dataset(CANOPY_FILE)
     old_lad = ds["lad"].data
     lad = get_new_lad(old_lad, **kwargs)
     ds["lad"].data = lad
-    ds.to_netcdf(f"{job_name}_static", format="NETCDF3_64BIT")
+    return ds

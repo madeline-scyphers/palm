@@ -2,7 +2,4 @@ pyyaml
 numpy
 pandas
 scipy
-netCDF4
-
-# development
-pytest
+xarray

@@ -1,5 +1,6 @@
 from abc import ABC, abstractmethod
 from typing import Optional
+from math import floor, remainder
 
 import numpy as np
 
@@ -60,29 +61,29 @@ class Cell(BaseDomainArea):
         
         return plot
     
-    def calc_perimeter(self, offset: int):
+    def calc_perimeter(self, x: int, y: int):
         # offset = 4
-        inset_min, inset_max = offset, self.matrix.shape[0] - offset
-        return 2 * self.matrix[inset_min:inset_max, 1].size + 2 * (self.matrix[1, inset_min:inset_max].size - 2)
+        # inset_min, inset_max = x, self.matrix.shape[0] - x
+        return 2 * x + 2 * y - 4
 
     def get_trees(self):
         no_of_trees = self.matrix.size // self.tree_domain_fraction
-        perimeter = self.calc_perimeter(self.x)
-        offset = 0
-        for offset_temp in range(0, (self.x - self.subplot.x) // 2):
-            perim = self.calc_perimeter(offset_temp)
-            if perim < no_of_trees:
-                break
-            perimeter = perim
-            offset = offset_temp
-        fence_edge = self.x - offset * 2
-        trees_fence = self.set_fence(offset, perimeter, no_of_trees)
+        perimeter = self.calc_perimeter(self.x, self.y)
+        # offset = 0
+        # for offset_temp in range(0, (self.x - self.subplot.x) // 2):
+        #     perim = self.calc_perimeter(offset_temp)
+        #     if perim < no_of_trees:
+        #         break
+        #     perimeter = perim
+        #     offset = offset_temp
+        # fence_edge = self.x - offset * 2
+        trees_fence = self.set_fence(perimeter, no_of_trees)
         return trees_fence
 
-    def set_fence(self, offset, perimeter, no_of_trees):
-        a = np.zeros((self.x, self.y), dtype=int)
-        a[(offset, self.x-offset -1), offset:self.x-offset] = 1
-        a[offset:self.x-offset, (offset, self.x-offset -1)] = 1
+    def set_fence(self, perimeter, no_of_trees):
+        a = np.zeros((self.y, self.x), dtype=int)
+        a[(0, -1),] = 1
+        a[:,(0, -1)] = 1
         perim_locations = np.linspace(0, perimeter, num=no_of_trees, endpoint=False, dtype=int)
         perim_inds = np.where(a[a == 1])[0]
         a[a == 1] = np.where(np.isin(perim_inds, perim_locations), 1, 0)
@@ -97,13 +98,13 @@ class Domain(BaseDomainArea):
         self._validate_matrix_size(subplot=self.subplot)
         self.matrix, self.trees_matrix = self.get_matrix()
         assert (self.x * self.y) // self.subplot.tree_domain_fraction == self.trees_matrix.sum(), (
-            f"Number of trees in trees matrix {self.trees_matrix} not expected number of trees: "
+            f"Number of trees in trees matrix \n{self.subplot.trees} \n(size: {self.trees_matrix.sum()}) not expected number of trees: "
             f"{(self.x * self.y) // self.subplot.tree_domain_fraction}")
         
     
     def print_tree_matrix(self) -> str:
         string = ""
-        for row in self.trees_matrix:
+        for row in self.trees_matrix: 
             string += f'{" ".join(str(int(pixel)) for pixel in row)}\n'
         return string
 
