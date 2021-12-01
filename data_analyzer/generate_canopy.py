@@ -3,6 +3,7 @@ import numpy as np
 from pathlib import Path
 
 import xarray as xr
+from xarray.core.dataset import Dataset
 
 CANOPY_FILE = (Path(__file__).parent / "homogenous_canopy.nc").resolve()
 
@@ -19,8 +20,8 @@ def get_new_lad(old_lad, tree_matrix, **kwargs):
 
 
 def copy_netcdf(job_name, **kwargs):
-    ds = xr.open_dataset(CANOPY_FILE)
+    ds: Dataset = xr.open_dataset(CANOPY_FILE)
     old_lad = ds["lad"].data
     lad = get_new_lad(old_lad, **kwargs)
     ds["lad"].data = lad
-    ds.to_netcdf(f"{job_name}_static", format="NETCDF3_CLASSIC")
+    ds.to_netcdf(f"{job_name}_static", format="NETCDF3_64BIT")

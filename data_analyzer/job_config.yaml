@@ -1,4 +1,4 @@
-job_name: "job1"
+job_name: "new_job"
 
 domain:
   x: 96  # prime factors 2,2,2,2,2,3

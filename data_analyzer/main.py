@@ -17,7 +17,7 @@ house = House(plot_size["x"] / x_factor, plot_size["y"] / y_factor, config["hous
 
 domain = Domain.from_domain_config(house, config)
 
-print(domain.print_tree_matrix())
+# print(domain.print_tree_matrix())
 
 with open("input", "w") as f:
     f.write(str(domain))
