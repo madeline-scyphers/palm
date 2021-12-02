@@ -133,7 +133,7 @@ job_config = r"""
 
 
 def generate_job_config(config: dict):
-    job_cfg = job_config.format(domain_x=config["domain"]["x"], domain_y=config["domain"]["y"])
+    job_cfg = job_config.format(domain_x=config["domain"]["x"] - 1, domain_y=config["domain"]["y"] - 1)
     return job_cfg
     # job_config_path = JOBS_PATH / "INPUT" / config["job_name"]
     # with open(job_config_path, "w") as f:
