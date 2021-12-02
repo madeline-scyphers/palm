@@ -92,7 +92,7 @@ job_config = r"""
     !dt_do2d_xz                = 100.0,  ! output interval for xz data
     !dt_do2d_yz                = 100.0,  ! output interval for yz data
 
-    data_output                = 'theta'
+    data_output                = 'theta', 'v', 'w', 'u', 's'
 
     !section_xy                = 0,1,2,3,4,5,6,7,8,9,10,11,12,13,15, ! grid index for 2D XY cross sections
     !section_yz                = 180,190,200,210,220,230,240, ! grid index for 2D YZ cross sections

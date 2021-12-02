@@ -97,10 +97,6 @@ class Domain(BaseDomainArea):
         self.y = y
         self._validate_matrix_size(subplot=self.subplot)
         self.matrix, self.trees_matrix = self.get_matrix()
-        assert (self.x * self.y) // self.subplot.tree_domain_fraction == self.trees_matrix.sum(), (
-            f"Number of trees in trees matrix \n{self.subplot.trees} \n(size: {self.trees_matrix.sum()}) not expected number of trees: "
-            f"{(self.x * self.y) // self.subplot.tree_domain_fraction}")
-        
     
     def print_tree_matrix(self) -> str:
         string = ""

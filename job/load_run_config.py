@@ -1,4 +1,5 @@
 from pathlib import Path
+import datetime as dt
 
 import yaml
 
@@ -21,8 +22,11 @@ del get_config
 del current_dir
 
 
-def default_config(domain_fraction, plot_size_x, plot_size_y, job_name=None):
-    job_name = job_name if job_name is not None else "default_job_name"
+def default_config(house_domain_fraction, plot_size_x, plot_size_y, job_name=None):
+    job_name = job_name if job_name is not None else dt.datetime.now().strftime("%Y%m%dT%H%M")
+    assert house_domain_fraction is not None, "house_domain_fraction must be specified"
+    assert plot_size_x is not None, "plot_size_x must be specified"
+    assert plot_size_y is not None, "plot_size_y must be specified"
     config = {
         "job_name": job_name,
         "domain": {
@@ -31,7 +35,7 @@ def default_config(domain_fraction, plot_size_x, plot_size_y, job_name=None):
             "z": 5
         },
         "house": {
-            "domain_fraction": domain_fraction,
+            "domain_fraction": house_domain_fraction,
             "height": 4
         },
         "plot_size": {

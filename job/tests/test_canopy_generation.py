@@ -2,7 +2,7 @@ import numpy as np
 
 from hypothesis import given, assume, settings, HealthCheck, strategies as st
 from job.utils import get_factors_rev
-from job.main import setup_domain
+from job.run import setup_domain
 
 DOMAIN_X = 96
 DOMAIN_Y = 216
