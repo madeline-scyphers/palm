@@ -1,6 +1,8 @@
 import os
 
-from typing import Iterator
+from pathlib import Path
+from typing import Iterable, Iterator
+
 
 def factors(nr) -> list[int]:
     i = 2
@@ -19,9 +21,13 @@ def get_factors_rev(n: int) -> Iterator[int]:
         if n % i == 0:
             for num in [i, n//i]:
                 yield num
+                
+def make_dirs(paths: Iterable[Path]) -> None:
+    for path in paths:
+        path.mkdir(parents=True, exist_ok=True)
 
-def safe_open(path, mode="w"):
-    ''' Open "path" for writing, creating any parent directories as needed.
-    '''
-    os.makedirs(os.path.dirname(path), exist_ok=True)
-    return open(path, mode)
+# def safe_open(path, mode="w"):
+#     ''' Open "path" for writing, creating any parent directories as needed.
+#     '''
+#     os.makedirs(os.path.dirname(path), exist_ok=True)
+#     return open(path, mode)

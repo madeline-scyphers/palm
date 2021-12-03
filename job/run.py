@@ -1,14 +1,15 @@
+import argparse
+import json
+
 import numpy as np
 
 from .domain import Domain, House, Cell
 from .load_run_config import default_config, USER_CODE_MODULE
 from .generate_canopy import get_lad_netcdf
-from .utils import get_factors_rev, safe_open
+from .utils import get_factors_rev, safe_open, make_dirs
 from .generate_job_config import generate_job_config
-from definitions import JOBS_PATH
+from definitions import JOBS_DIR
 from __version__ import __version__ as VERSION
-
-import argparse
 
 
 def init_argparse() -> argparse.ArgumentParser:
@@ -54,19 +55,32 @@ def setup_domain(cfg):
     return Domain.from_domain_config(house, cfg)
     
 def write_output(domain: Domain, config, job_config, ds):
-    job_path = JOBS_PATH / config['job_name']
-    with safe_open(job_path / "INPUT" / f"{config['job_name']}_topo", "w") as f:
+    
+    jobs = JOBS_DIR / config['job_name']
+    input_path = jobs / "INPUT"
+    user_code_path = jobs / "USER_CODE"
+    wrapper_config_path = jobs / "wrapper_config"
+    dir_to_make = [input_path, user_code_path, wrapper_config_path]
+    make_dirs(dir_to_make)
+    
+    with open(input_path / f"{config['job_name']}_topo", "w") as f:
         f.write(str(domain))
         
-    with safe_open(job_path / "INPUT" / f"{config['job_name']}_p3d", "w") as f:
+    with open(input_path / f"{config['job_name']}_p3d", "w") as f:
         f.write(job_config)
         
-    with safe_open(job_path / "USER_CODE" / "user_module.f90", "w") as f:
+    with open(user_code_path / "user_module.f90", "w") as f:
         user_code_module = open(USER_CODE_MODULE).read()
         f.write(user_code_module)
         
-    ds.to_netcdf(job_path / "INPUT" / f"{config['job_name']}_static", format="NETCDF3_64BIT")
+    ds.to_netcdf(input_path / f"{config['job_name']}_static", format="NETCDF3_64BIT")
 
+    domain.save_matrix(wrapper_config_path / "topo.csv")
+    domain.save_matrix(wrapper_config_path / "canopy.csv",  matrix_name="trees_matrix")
+    domain.subplot.save_matrix(wrapper_config_path / "cell.csv")
+    domain.subplot.subplot.save_matrix(wrapper_config_path / "house.csv")
+    with open(wrapper_config_path / "wrapper_config.json", "w") as f:
+        json.dump(config, f)
 
 def parse_args(parser: argparse.ArgumentParser, kwargs):
     args = parser.parse_args()

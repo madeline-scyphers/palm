@@ -29,7 +29,10 @@ class BaseDomainArea(ABC):
             if subplot_val and cell_val < subplot_val:
                 raise ValueError(f"The {value} ({cell_val}) value of {self.__class__.__name__}"
                                  f" must be larger than the house ({subplot_val}) going on it!")
-
+                
+    def save_matrix(self, filename: str, matrix_name: str = None) -> None:
+        matrix = self.matrix if matrix_name is None else getattr(self, matrix_name)
+        np.savetxt(filename, matrix, delimiter=",")
 
 class House(BaseDomainArea):
     def __init__(self, x: int, y: int, z: int) -> None:

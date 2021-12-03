@@ -1,3 +1,3 @@
 from pathlib import Path
 
-JOBS_PATH = Path(__file__).parent / "current_version" / "JOBS"
+JOBS_DIR = Path(__file__).parent / "current_version" / "JOBS"
