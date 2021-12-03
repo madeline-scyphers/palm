@@ -1,61 +1,59 @@
+import itertools
 import os
 import subprocess
+from typing import Iterable
+import logging
+import datetime as dt
+
+from pprint import pformat
+
+import numpy as np
 
 from job.run import main
 
+
+logging.basicConfig(filename=f'{dt.datetime.now().strftime("%Y%m%dT%H%M%S")}.log', encoding='utf-8', level=logging.INFO)
+
 summary = """
------------------ NEW JOB -----------------
-
-Job Name {job_name}
-
+----------------- JOB WRAPPER CONFIG -----------------
 
 """
 
+def main():
 
-job_name = main(house_domain_fraction=4, plot_size_x=12, plot_size_y=8)
+    plot_width_factors = 2,2,2,2,2,3
 
-print(job_name)
+    plot_height_factors = 2,2,2,3,3,3
 
-os.chdir("current_version")
+    plot_widths = set(get_possible_plot_sizes(plot_width_factors))
+    plot_heights = set(get_possible_plot_sizes(plot_height_factors))
+    
+    for plot_width in plot_widths:
+        for plot_height in plot_heights:
+            try:
+                run_job(plot_width, plot_height)
+            except TypeError as e:
+                logging.exception(e)
+                
+def get_possible_plot_sizes(plot_width_factors: Iterable):
+    for length, _ in enumerate(plot_width_factors, start=1):
+        for subset in itertools.combinations(plot_width_factors, length):
+            yield np.prod(subset)
 
-print("process running!")
-result = subprocess.run(["sh", "start_job.sh", job_name], stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-# process = subprocess.Popen(["sh", "view_queue.sh"], stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
-# result = subprocess.run(["sh", "start_job.sh", job_name], stdout=subprocess.PIPE,  stderr=subprocess.PIPE, text=True)
-# result = subprocess.run(["sh", "view_queue.sh"], stdout=subprocess.PIPE,  stderr=subprocess.PIPE, text=True)
-
-print("stdout: ", result.stdout)
-# print(process.stdout.read())
-# while True:
-#     # outs, errs = process.communicate()
-#     # print(outs, errs)
-#     # output = process.stdout.readline()
-#     # output = process.stderr.readline()
-#     # if output:
-#     #     print("printing output")
-#     #     print(output.strip())
-#     result = process.poll()
-#     if result is not None:
-#         break
-# print(result.stderr)
-# print(result.stdout)
-print(summary.format(job_name=job_name))
-
-print("script done")
+def run_job(plot_width, plot_height):
+    wrapper_config = main(house_domain_fraction=4, plot_size_x=plot_width, plot_size_y=plot_height)
+    
+    logging.INFO("Starting new job %s", wrapper_config["job_name"])
 
 
-"""
+    os.chdir("current_version")
 
-20211202T181145 8 8
-20211202T181512 4 4
-20211202T181902 16 8
-20211202T182327 16 4
-20211202T182606 16 2
-20211202T182802 8 2
-20211202T183000 4 2
-20211202T183222 6 4
-20211202T183426 12 4
-20211202T183638 12 12
-20211202T183847 12 8
+    # print("process running!")
+    result = subprocess.run(["sh", "start_job.sh", wrapper_config["job_name"]], stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
 
-"""
+    logging.INFO("stdout: ", result.stdout)
+
+    logging.INFO(summary)
+    logging.INFO(pformat(wrapper_config))
+
+    logging.INFO("\nscript done")
