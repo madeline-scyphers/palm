@@ -1,7 +1,7 @@
 import numpy as np
 
 from .domain import Domain, House, Cell
-from .load_run_config import default_config
+from .load_run_config import default_config, USER_CODE_MODULE
 from .generate_canopy import get_lad_netcdf
 from .utils import get_factors_rev, safe_open
 from .generate_job_config import generate_job_config
@@ -54,15 +54,19 @@ def setup_domain(cfg):
     return Domain.from_domain_config(house, cfg)
     
 def write_output(domain: Domain, config, job_config, ds):
-    job_path = JOBS_PATH / config['job_name'] / "INPUT"
-    with safe_open(job_path / f"{config['job_name']}_topo", "w") as f:
+    job_path = JOBS_PATH / config['job_name']
+    with safe_open(job_path / "INPUT" / f"{config['job_name']}_topo", "w") as f:
         f.write(str(domain))
         
-    with safe_open(job_path / f"{config['job_name']}_p3d", "w") as f:
+    with safe_open(job_path / "INPUT" / f"{config['job_name']}_p3d", "w") as f:
         f.write(job_config)
         
-    ds.to_netcdf(job_path / f"{config['job_name']}_static", format="NETCDF3_64BIT")
-    
+    with safe_open(job_path / "USER_CODE" / "user_module.f90", "w") as f:
+        user_code_module = open(USER_CODE_MODULE).read()
+        f.write(user_code_module)
+        
+    ds.to_netcdf(job_path / "INPUT" / f"{config['job_name']}_static", format="NETCDF3_64BIT")
+
 
 def parse_args(parser: argparse.ArgumentParser, kwargs):
     args = parser.parse_args()
@@ -99,6 +103,8 @@ def main(**kwargs):
     job_config = generate_job_config(config)
     ds = get_lad_netcdf(job_name=config["job_name"], tree_matrix=domain.trees_matrix)
     write_output(domain, config, job_config, ds)
+    
+    return config["job_name"]
 
 if __name__ == "__main__":
-    main()
+    print(main())

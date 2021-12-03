@@ -9,6 +9,8 @@ __all__ = ["config", "default_config"]
 
 current_dir = Path(__file__).resolve().parent
 
+USER_CODE_MODULE = current_dir / "user_module.f90"
+
 
 def get_config(file: str = "job_config.yaml") -> dict:
     with open(current_dir / file, "r") as f:
@@ -23,7 +25,7 @@ del current_dir
 
 
 def default_config(house_domain_fraction, plot_size_x, plot_size_y, job_name=None):
-    job_name = job_name if job_name is not None else dt.datetime.now().strftime("%Y%m%dT%H%M")
+    job_name = job_name if job_name is not None else dt.datetime.now().strftime("%Y%m%dT%H%M%S")
     assert house_domain_fraction is not None, "house_domain_fraction must be specified"
     assert plot_size_x is not None, "plot_size_x must be specified"
     assert plot_size_y is not None, "plot_size_y must be specified"
