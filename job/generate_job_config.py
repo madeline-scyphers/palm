@@ -64,7 +64,7 @@ job_config = r"""
 !
 !-- run steering
 !-------------------------------------------------------------------------------
-    end_time                   = 300.0, ! simulation time of the 3D model
+    end_time                   = {output_end_time}, ! simulation time of the 3D model
 
     !create_disturbances        = .TRUE., ! randomly perturbate horiz. velocity
     !dt_disturb                 = 1500.0,  ! interval for random perturbations
@@ -87,7 +87,7 @@ job_config = r"""
 
     dt_run_control             = 0.0,    ! output interval for run control
     dt_data_output             = 5.0,   ! output interval for general data
-    !skip_time_data_output      = 23400.0, ! time interval skipped before output starts
+    skip_time_data_output      = {output_start_time}, ! time interval skipped before output starts
     !dt_do2d_xy                = 100.0,  ! output interval for xy data
     !dt_do2d_xz                = 100.0,  ! output interval for xz data
     !dt_do2d_yz                = 100.0,  ! output interval for yz data
@@ -133,5 +133,6 @@ job_config = r"""
 
 
 def generate_job_config(config: dict):
-    job_cfg = job_config.format(domain_x=config["domain"]["x"] - 1, domain_y=config["domain"]["y"] - 1)
+    job_cfg = job_config.format(domain_x=config["domain"]["x"] - 1, domain_y=config["domain"]["y"] - 1,
+                                output_start_time=config["output_start_time"], output_end_time=config["output_end_time"])
     return job_cfg

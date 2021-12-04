@@ -38,6 +38,12 @@ def init_argparse() -> argparse.ArgumentParser:
     parser.add_argument(
         "-py", "--plot_size_y", type=int
         )
+    parser.add_argument(
+        "-st", "--output_start_time", type=int
+        )
+    parser.add_argument(
+        "-et", "--output_end_time", type=int
+        )
 
     return parser
 
@@ -88,6 +94,8 @@ def parse_args(parser: argparse.ArgumentParser, kwargs):
     kwargs = _parse_single_arg("plot_size_x", args, kwargs)
     kwargs = _parse_single_arg("plot_size_y", args, kwargs)
     kwargs = _parse_single_arg("job_name", args, kwargs)
+    kwargs = _parse_single_arg("output_start_time", args, kwargs)
+    kwargs = _parse_single_arg("output_end_time", args, kwargs)
     return kwargs
 
 def _parse_single_arg(arg: str, args: argparse.Namespace, kwargs):

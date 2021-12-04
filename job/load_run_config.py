@@ -24,25 +24,32 @@ del get_config
 del current_dir
 
 
-def default_config(house_domain_fraction, plot_size_x, plot_size_y, job_name=None):
+def default_config(house_domain_fraction, 
+                   plot_size_x, 
+                   plot_size_y,
+                   output_start_time=0,
+                   output_end_time=300, 
+                   job_name=None):
     job_name = job_name if job_name is not None else dt.datetime.now().strftime("%Y%m%dT%H%M%S")
     assert house_domain_fraction is not None, "house_domain_fraction must be specified"
     assert plot_size_x is not None, "plot_size_x must be specified"
     assert plot_size_y is not None, "plot_size_y must be specified"
     config = {
         "job_name": job_name,
+        "output_start_time": output_start_time,
+        "output_end_time": output_end_time,
         "domain": {
             "x": 96,
             "y": 216,
             "z": 5
         },
         "house": {
-            "domain_fraction": house_domain_fraction,
+            "domain_fraction": int(house_domain_fraction),
             "height": 4
         },
         "plot_size": {
-            "x": plot_size_x,
-            "y": plot_size_y
+            "x": int(plot_size_x),
+            "y": int(plot_size_y)
         },
         "trees": {
             "domain_fraction": 8
