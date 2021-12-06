@@ -70,16 +70,9 @@ class Cell(BaseDomainArea):
         return 2 * x + 2 * y - 4
 
     def get_trees(self):
-        no_of_trees = self.matrix.size // self.tree_domain_fraction
+        no_of_trees = self.matrix.size // self.tree_domain_fraction if self.tree_domain_fraction is not None else 0
         perimeter = self.calc_perimeter(self.x, self.y)
-        # offset = 0
-        # for offset_temp in range(0, (self.x - self.subplot.x) // 2):
-        #     perim = self.calc_perimeter(offset_temp)
-        #     if perim < no_of_trees:
-        #         break
-        #     perimeter = perim
-        #     offset = offset_temp
-        # fence_edge = self.x - offset * 2
+
         trees_fence = self.set_fence(perimeter, no_of_trees)
         return trees_fence
 

@@ -2,16 +2,12 @@
 import json
 from dataclasses import dataclass
 import math
+import logging
 
 import holoviews as hv
-import matplotlib.pyplot as plt
 import numpy as np
 import panel as pn
-import param
-import scipy.io
 import xarray as xr
-from holoviews.operation.datashader import regrid
-from scipy import stats
 
 from utils import pad_along_axis
 
@@ -70,16 +66,25 @@ class AnalyzeRun:
         return np.arange(0, one_pt_5_canopy_height)
 
     def substantiate_config_tracker(self):
+        with open(self.run_config, "r") as f:
+            cfg= json.load(f)
+        
+        logging.info("analyzing %s with plot size X: %s and Y: %s ", cfg["job_name"], cfg["plot_size"]["x"], cfg["plot_size"]["y"])
+        
         self.load_data_sets()
         
         dis_spatiotemporal_mean = self.get_deposition()
-        
+        logging.info("dis_spatiotemporal_mean %s", dis_spatiotemporal_mean)
+
         DS0 = self.get_delta_s0()
         sweep_perc = self.calc_sweep_perc(DS0)
-        delta_s0_bounds_perc = self.calc_DS0_bounds_perc(DS0)
         
-        with open(self.run_config, "r") as f:
-            cfg= json.load(f)
+        logging.info("sweep_perc %s", sweep_perc)
+       
+        delta_s0_bounds_perc = self.calc_DS0_bounds_perc(DS0)
+       
+        logging.info("delta_s0_bounds_perc %s", delta_s0_bounds_perc)
+       
         config_tracker = ConfigTracker(
             job_name=cfg["job_name"],
             domain_x=cfg["domain"]["x"],

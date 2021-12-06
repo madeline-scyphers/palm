@@ -105,28 +105,44 @@ def _parse_single_arg(arg: str, args: argparse.Namespace, kwargs):
 
 def validate_domain(domain, config):
     try:
-        assert (domain.x * domain.y) // domain.subplot.tree_domain_fraction == domain.trees_matrix.sum(), (
+        assert (
+            (domain.x * domain.y) // domain.subplot.tree_domain_fraction == domain.trees_matrix.sum() if domain.subplot.tree_domain_fraction is not None
+            else 0 == domain.trees_matrix.sum()
+            ), (
             f"Number of trees in trees matrix \n{domain.subplot.trees} \n(size: {domain.trees_matrix.sum()}) not expected number of trees: "
             f"{(domain.x * domain.y) // domain.subplot.tree_domain_fraction}")
         assert domain.matrix.shape == (config["domain"]["y"], config["domain"]["x"])
         assert np.count_nonzero(domain.matrix) == (config["domain"]["y"] * config["domain"]["x"]) / config["house"]["domain_fraction"]
-        assert np.count_nonzero(domain.trees_matrix) == (config["domain"]["y"] * config["domain"]["x"]) / config["trees"]["domain_fraction"]
+        assert np.count_nonzero(domain.trees_matrix) == (
+            (config["domain"]["y"] * config["domain"]["x"]) / config["trees"]["domain_fraction"] if config["trees"]["domain_fraction"]
+            else 0
+            )
     except AssertionError as e:
         raise TypeError("Invalid domain configuration") from e
 
-def main(**kwargs):
+def get_config(**kwargs):
     parser = init_argparse()
     
     kwargs = parse_args(parser, kwargs)
 
     config = default_config(**kwargs)
+    return config
+
+def create_input_files(config):
+
     domain = setup_domain(config)
     validate_domain(domain, config)
     job_config = generate_job_config(config)
     ds = get_lad_netcdf(job_name=config["job_name"], tree_matrix=domain.trees_matrix)
     write_output(domain, config, job_config, ds)
+
+def main(**kwargs):
+    
+    config = get_config(**kwargs)
+
+    create_input_files(config)
     
     return config
 
 if __name__ == "__main__":
-    print(main())
+    print(main(house_domain_fraction=4, plot_size_x=4, plot_size_y=18, tree_domain_fraction=8))

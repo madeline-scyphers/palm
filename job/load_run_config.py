@@ -24,9 +24,10 @@ del get_config
 del current_dir
 
 
-def default_config(house_domain_fraction, 
+def default_config(house_domain_fraction,
                    plot_size_x, 
                    plot_size_y,
+                   tree_domain_fraction=8,
                    output_start_time=0,
                    output_end_time=300, 
                    job_name=None):
@@ -52,7 +53,7 @@ def default_config(house_domain_fraction,
             "y": int(plot_size_y)
         },
         "trees": {
-            "domain_fraction": 8
+            "domain_fraction": tree_domain_fraction
         },
         
     }
