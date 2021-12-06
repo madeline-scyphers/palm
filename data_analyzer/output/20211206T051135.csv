@@ -1,0 +1,2 @@
+,job_name,domain_x,domain_y,plot_x,plot_y,house_domain_fraction,trees_domain_fraction,run_time,sw_count,ej_count,sweep_perc,delta_s0_bounds_perc
+0,20211206T051135,96,216,8,8,4,4,600,111893,104774,0.3597382973251029,0.1775270061728395

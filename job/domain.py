@@ -2,7 +2,7 @@ from abc import ABC, abstractmethod
 from typing import Optional
 from math import floor, remainder
 
-from utils import get_factors_rev
+from .utils import get_factors_rev
 
 import numpy as np
 

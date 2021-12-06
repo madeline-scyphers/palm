@@ -3,11 +3,11 @@ import json
 
 import numpy as np
 
-from domain import Domain, House, Cell, setup_domain
-from load_run_config import default_config, USER_CODE_MODULE
-from generate_canopy import get_lad_netcdf
-from utils import get_factors_rev, make_dirs
-from generate_job_config import generate_job_config
+from .domain import Domain, House, Cell, setup_domain
+from .load_run_config import default_config, USER_CODE_MODULE
+from .generate_canopy import get_lad_netcdf
+from .utils import get_factors_rev, make_dirs
+from .generate_job_config import generate_job_config
 from definitions import JOBS_DIR
 from __version__ import __version__ as VERSION
 

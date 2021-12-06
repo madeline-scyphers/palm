@@ -50,20 +50,21 @@ def main():
     #         run_job(plot_width, plot_height)
     
 
-    run_job(2, 8)
-    run_job(2, 12)
-    run_job(4, 4)
-    run_job(4, 8)
-    run_job(4, 18)
-    run_job(8, 8)
-    run_job(8, 16)
-    run_job(16, 24)
-    run_job(32, 24)
+    run_job(2, 8, tree_domain_fraction=4)
+    run_job(2, 12, tree_domain_fraction=4)
+    run_job(4, 4, tree_domain_fraction=4)
+    run_job(4, 8, tree_domain_fraction=4)
+    run_job(4, 18, tree_domain_fraction=4)
+    run_job(8, 8, tree_domain_fraction=4)
+    run_job(8, 16, tree_domain_fraction=4)
+    run_job(16, 24, tree_domain_fraction=4)
+    run_job(32, 24, tree_domain_fraction=4)
     
-    run_job(32, 72, tree_domain_fraction=16)
-    run_job(96, 72, tree_domain_fraction=16)
-    run_job(4, 4, tree_domain_fraction=16)
-    run_job(8, 8, tree_domain_fraction=16)
+    run_job(32, 36, tree_domain_fraction=4)
+    run_job(32, 72, tree_domain_fraction=4)
+    run_job(48, 72, tree_domain_fraction=4)
+    run_job(96, 72, tree_domain_fraction=4)
+    run_job(96, 108, tree_domain_fraction=4)
                 
 def get_possible_plot_sizes(plot_width_factors: Iterable):
     for length, _ in enumerate(plot_width_factors, start=1):

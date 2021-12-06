@@ -44,7 +44,9 @@ class ConfigTracker:
     house_domain_fraction: int
     trees_domain_fraction: int
     run_time: int
-    dis_spatiotemporal_mean: float
+    # dis_spatiotemporal_mean: float
+    sw_count: int
+    ej_count: int
     sweep_perc: float 
     delta_s0_bounds_perc: float
     
@@ -69,17 +71,19 @@ class AnalyzeRun:
         with open(self.run_config, "r") as f:
             cfg= json.load(f)
         
-        logging.info("analyzing %s with plot size X: %s and Y: %s ", cfg["job_name"], cfg["plot_size"]["x"], cfg["plot_size"]["y"])
+        logging.info("analyzing %s with plot size X: %s and Y: %s and tree domain fraction: %s", cfg["job_name"], cfg["plot_size"]["x"], cfg["plot_size"]["y"], cfg["trees"]["domain_fraction"])
         
         self.load_data_sets()
         
-        dis_spatiotemporal_mean = self.get_deposition()
-        logging.info("dis_spatiotemporal_mean %s", dis_spatiotemporal_mean)
+        # dis_spatiotemporal_mean = self.get_deposition()
+        # logging.info("dis_spatiotemporal_mean %s", dis_spatiotemporal_mean)
 
         DS0 = self.get_delta_s0()
-        sweep_perc = self.calc_sweep_perc(DS0)
+        sw_count, ej_count, sweep_perc = self.calc_sweep_perc(DS0)
         
         logging.info("sweep_perc %s", sweep_perc)
+        logging.info("sweep count %s", sw_count)
+        logging.info("ejection count %s", ej_count)
        
         delta_s0_bounds_perc = self.calc_DS0_bounds_perc(DS0)
        
@@ -93,7 +97,9 @@ class AnalyzeRun:
             plot_y=cfg["plot_size"]["y"],
             house_domain_fraction=cfg["house"]["domain_fraction"],
             trees_domain_fraction=cfg["trees"]["domain_fraction"],
-            dis_spatiotemporal_mean=dis_spatiotemporal_mean,
+            # dis_spatiotemporal_mean=dis_spatiotemporal_mean,
+            sw_count=sw_count,
+            ej_count=ej_count,
             sweep_perc=sweep_perc,
             delta_s0_bounds_perc=delta_s0_bounds_perc,
             run_time = cfg["output_end_time"] - cfg["output_start_time"]
@@ -241,7 +247,7 @@ class AnalyzeRun:
         ej_count = (DS0[self.one_pt_5_canopy_height, ...] < 0).sum(axis=None)
         n_grid = math.prod(DS0[self.one_pt_5_canopy_height, ...].shape)
         
-        return sw_count / n_grid
+        return sw_count, ej_count, sw_count / n_grid
 
     @staticmethod
     def calc_DS0_bounds_perc(DS0):
