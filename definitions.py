@@ -1,3 +1,7 @@
 from pathlib import Path
 
-JOBS_DIR = Path(__file__).parent / "current_version" / "JOBS"
+BASE_DIR = Path(__file__).parent.resolve()
+
+JOBS_DIR = BASE_DIR / "current_version" / "JOBS"
+
+print(BASE_DIR)
