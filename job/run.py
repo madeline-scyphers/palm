@@ -3,11 +3,11 @@ import json
 
 import numpy as np
 
-from .domain import Domain, House, Cell
-from .load_run_config import default_config, USER_CODE_MODULE
-from .generate_canopy import get_lad_netcdf
-from .utils import get_factors_rev, make_dirs
-from .generate_job_config import generate_job_config
+from domain import Domain, House, Cell, setup_domain
+from load_run_config import default_config, USER_CODE_MODULE
+from generate_canopy import get_lad_netcdf
+from utils import get_factors_rev, make_dirs
+from generate_job_config import generate_job_config
 from definitions import JOBS_DIR
 from __version__ import __version__ as VERSION
 
@@ -46,19 +46,6 @@ def init_argparse() -> argparse.ArgumentParser:
         )
 
     return parser
-
-def setup_domain(cfg):
-    house_fraction_denominator = cfg["house"]["domain_fraction"]
-
-    factors = get_factors_rev(house_fraction_denominator)
-    x_factor = next(factors)
-    y_factor = next(factors)
-
-    plot_size = cfg["plot_size"]
-
-    house = House(plot_size["x"] / x_factor, plot_size["y"] / y_factor, cfg["house"]["height"])
-
-    return Domain.from_domain_config(house, cfg)
     
 def write_output(domain: Domain, config, job_config, ds):
     
