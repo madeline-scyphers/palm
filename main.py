@@ -21,8 +21,10 @@ ONE_HOUR = 60 * ONE_MIN
 OUTPUT_START_TIME = 6 * ONE_HOUR
 OUTPUT_END_TIME = 6 * ONE_HOUR + TEN_MIN
 
+log_dir = Path().resolve() / "run_logs"
+log_dir.mkdir(exist_ok=True)
 
-logging.basicConfig(filename=Path().resolve() / f'run_logs/{dt.datetime.now().strftime("%Y%m%dT%H%M%S")}.log', 
+logging.basicConfig(filename=log_dir / f'{dt.datetime.now().strftime("%Y%m%dT%H%M%S")}.log', 
                     encoding='utf-8', 
                     level=logging.INFO,
                     format='%(asctime)s | %(name)s | %(levelname)s | %(message)s'
