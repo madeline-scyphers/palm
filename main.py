@@ -1,11 +1,12 @@
 import itertools
 import os
 import subprocess
-from typing import Iterable
 import logging
 import datetime as dt
 import shutil
+from typing import Iterable
 
+from pathlib import Path
 from pprint import pformat
 
 import numpy as np
@@ -21,7 +22,7 @@ OUTPUT_START_TIME = 6 * ONE_HOUR
 OUTPUT_END_TIME = 6 * ONE_HOUR + TEN_MIN
 
 
-logging.basicConfig(filename=f'{dt.datetime.now().strftime("%Y%m%dT%H%M%S")}.log', 
+logging.basicConfig(filename=Path().resolve() / f'run_logs/{dt.datetime.now().strftime("%Y%m%dT%H%M%S")}.log', 
                     encoding='utf-8', 
                     level=logging.INFO,
                     format='%(asctime)s | %(name)s | %(levelname)s | %(message)s'

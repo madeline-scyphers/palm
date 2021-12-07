@@ -100,6 +100,9 @@ job_config = r"""
     !section_xy                = 0,1,2,3,4,5,6,7,8,9,10,11,12,13,15, ! grid index for 2D XY cross sections
     !section_yz                = 180,190,200,210,220,230,240, ! grid index for 2D YZ cross sections
     !section_xz                = 250,260,270,280,290,300,310,320, ! grid index for 2D XZ cross sections
+    
+    !physics
+    omega                      = 0.0  ! Turn off coriolis
 
 / ! end of runtime parameter namelist
 
