@@ -38,12 +38,12 @@ summary = """
 
 def main():
 
-    plot_width_factors = 2,2,2,2,2,3
+    # plot_width_factors = 2,2,2,2,2,3
 
-    plot_height_factors = 2,2,2,3,3,3
+    # plot_height_factors = 2,2,2,3,3,3
 
-    plot_widths = set(get_possible_plot_sizes(plot_width_factors))
-    plot_heights = set(get_possible_plot_sizes(plot_height_factors))
+    # plot_widths = set(get_possible_plot_sizes(plot_width_factors))
+    # plot_heights = set(get_possible_plot_sizes(plot_height_factors))
 
     # plot_widths = [4, 8, 12, 16]
     # plot_heights = [2, 4, 8, 12, 16, 32]
@@ -53,32 +53,34 @@ def main():
     #         run_job(plot_width, plot_height)
     
 
-    run_job(2, 8, tree_domain_fraction=4)
-    run_job(2, 12, tree_domain_fraction=4)
-    run_job(4, 4, tree_domain_fraction=4)
-    run_job(4, 8, tree_domain_fraction=4)
-    run_job(4, 18, tree_domain_fraction=4)
-    run_job(8, 8, tree_domain_fraction=4)
-    run_job(8, 16, tree_domain_fraction=4)
-    run_job(16, 24, tree_domain_fraction=4)
-    run_job(32, 24, tree_domain_fraction=4)
+    run_job()
+    # run_job(2, 12, tree_domain_fraction=4)
+    # run_job(4, 4, tree_domain_fraction=4)
+    # run_job(4, 8, tree_domain_fraction=4)
+    # run_job(4, 18, tree_domain_fraction=4)
+    # run_job(8, 8, tree_domain_fraction=4)
+    # run_job(8, 16, tree_domain_fraction=4)
+    # run_job(16, 24, tree_domain_fraction=4)
+    # run_job(32, 24, tree_domain_fraction=4)
     
-    run_job(32, 36, tree_domain_fraction=4)
-    run_job(32, 72, tree_domain_fraction=4)
-    run_job(48, 72, tree_domain_fraction=4)
-    run_job(96, 72, tree_domain_fraction=4)
-    run_job(96, 108, tree_domain_fraction=4)
+    # run_job(32, 36, tree_domain_fraction=4)
+    # run_job(32, 72, tree_domain_fraction=4)
+    # run_job(48, 72, tree_domain_fraction=4)
+    # run_job(96, 72, tree_domain_fraction=4)
+    # run_job(96, 108, tree_domain_fraction=4)
                 
 def get_possible_plot_sizes(plot_width_factors: Iterable):
     for length, _ in enumerate(plot_width_factors, start=1):
         for subset in itertools.combinations(plot_width_factors, length):
             yield np.prod(subset)
 
-def run_job(plot_width, plot_height, **kwargs):
+def run_job( **kwargs):
     try:
         os.chdir(f'{os.path.expanduser("~")}/palm')
+        # wrapper_config = run.get_config(
+        #     plot_size_x=plot_width, plot_size_y=plot_height, house_domain_fraction=4,
+        #     output_start_time=OUTPUT_START_TIME, output_end_time=OUTPUT_END_TIME, **kwargs)
         wrapper_config = run.get_config(
-            plot_size_x=plot_width, plot_size_y=plot_height, house_domain_fraction=4,
             output_start_time=OUTPUT_START_TIME, output_end_time=OUTPUT_END_TIME, **kwargs)
     
         _run_job(wrapper_config)
