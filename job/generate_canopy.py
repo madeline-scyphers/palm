@@ -20,14 +20,14 @@ def get_new_lad(old_lad, tree_matrix, **kwargs):
     return new_lad
 
 
-def get_lad_netcdf(job_name, tree_matrix, **kwargs):
+def get_lad_netcdf(job_name, tree_matrix, dx, dy, dz, **kwargs):
     trees = tree_matrix * -1
-    new_lad_ds = generate_canopy(trees.T)  #  todo cleanup the having to traspose things
+    new_lad_ds = generate_canopy(trees.T, zlad=np.arange(0, 8 * dz, dz), dz=dz)  #  todo cleanup the having to traspose things
     ds = new_lad_ds.drop(labels=["lai", "height", "patch", "flux", "DBHc"])
-    ds = set_ds_attrs(ds)
+    ds = set_ds_attrs_and_coords(ds, dx, dy)
     return ds
 
-def set_ds_attrs(ds: xr.Dataset):
+def set_ds_attrs_and_coords(ds: xr.Dataset, dx: float, dy: float):
     attrs = dict(
         Conventions='CF-1.7',
         origin_lat=40.16339309801363,  # outskirts of Columbus ohio
@@ -38,7 +38,12 @@ def set_ds_attrs(ds: xr.Dataset):
         origin_z=275.0,
         rotation_angle=0.0
     )
+    nx = ds.x.size
+    ny = ds.y.size
+    x = np.arange(0, nx*dx, dx, dtype=float)
+    y = np.arange(0, ny*dy, dy, dtype=float)
     ds = ds.assign_attrs(**attrs)
+    ds = ds.assign_coords(x=x, y=y)
     return ds
 
     

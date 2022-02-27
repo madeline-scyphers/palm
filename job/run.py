@@ -116,7 +116,7 @@ def create_input_files(config):
     domain = setup_domain(config)
     validate_domain(domain, config)
     job_config = generate_job_config(config)
-    ds = get_lad_netcdf(job_name=config["job_name"], tree_matrix=domain.trees_matrix)
+    ds = get_lad_netcdf(job_name=config["job_name"], tree_matrix=domain.trees_matrix, dx=config["domain"]["dx"], dy=config["domain"]["dy"], dz=config["domain"]["dz"])
     write_output(domain, config, job_config, ds)
 
 def main(**kwargs):
