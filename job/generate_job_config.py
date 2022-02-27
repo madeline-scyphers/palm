@@ -53,6 +53,11 @@ job_config = r"""
 !-- numerics
 !-------------------------------------------------------------------------------
     fft_method                 = 'temperton-algorithm',   ! build-in fft method
+    
+!
+!-- Physics
+!------------------------------------------------------------------------------
+    omega = 0.0,
 
 / ! end of initialization parameter namelist
 
@@ -101,8 +106,6 @@ job_config = r"""
     !section_yz                = 180,190,200,210,220,230,240, ! grid index for 2D YZ cross sections
     !section_xz                = 250,260,270,280,290,300,310,320, ! grid index for 2D XZ cross sections
     
-    !physics
-    !omega                      = 0.0  ! Turn off coriolis
 
 / ! end of runtime parameter namelist
 
