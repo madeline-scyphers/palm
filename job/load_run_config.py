@@ -24,34 +24,55 @@ del get_config
 del current_dir
 
 
-def default_config(house_domain_fraction,
-                   plot_size_x, 
-                   plot_size_y,
-                   tree_domain_fraction=8,
+def default_config(
+                #    plot_size_x, 
+                #    plot_size_y,
+                   domain_x=192,
+                   domain_y=432,
+                   dx=3,
+                   dy=3,
+                   dz=3,
+                   house_footprint=200,
+                   plot_footprint=700,
+                   plot_ratio=0.71,
+                   tree_domain_fraction=4,
                    output_start_time=0,
                    output_end_time=300, 
                    job_name=None):
     job_name = job_name if job_name is not None else dt.datetime.now().strftime("%Y%m%dT%H%M%S")
-    assert house_domain_fraction is not None, "house_domain_fraction must be specified"
-    assert plot_size_x is not None, "plot_size_x must be specified"
-    assert plot_size_y is not None, "plot_size_y must be specified"
+    assert house_footprint is not None, "house_domain_fraction must be specified"
+    # assert plot_size_x is not None, "plot_size_x must be specified"
+    # assert plot_size_y is not None, "plot_size_y must be specified"
     config = {
         "job_name": job_name,
         "output_start_time": output_start_time,
         "output_end_time": output_end_time,
         "domain": {
-            "x": 96,
-            "y": 216,
-            "z": 5
+            "x": domain_x,
+            "y": domain_y,
+            "z": 5,
+            "dx": dx,
+            "dy": dy,
+            "dz": dz,
+            "urban_ratio": 0.5
         },
         "house": {
-            "domain_fraction": int(house_domain_fraction),
-            "height": 4
+            "footprint": int(house_footprint),  # in square meters
+            "height": 4,
+            "padding": 1,
+            
         },
-        "plot_size": {
-            "x": int(plot_size_x),
-            "y": int(plot_size_y)
+        "plot": {
+            "plot_footprint": plot_footprint,
+            "plot_ratio": plot_ratio
         },
+        "road": {
+            "width": 6 / dx
+        },
+        # "plot_size": {
+        #     "x": int(plot_size_x),
+        #     "y": int(plot_size_y)
+        # },
         "trees": {
             "domain_fraction": tree_domain_fraction
         },

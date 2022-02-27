@@ -47,7 +47,7 @@ job_config = r"""
 
     passive_scalar             = .T.  !To activate the scalar flux
     surface_scalarflux         = 0.0, !It should be input even if it is 0.0 for the wall_scalarflux be active
-    !wall_scalarflux            = 0.0,0.0,0.0,1.0,0.0, !It is in kg m-1 s-2.
+    wall_scalarflux            = 0.0,0.0,0.0,1.0,0.0, !It is in kg m-1 s-2.
 
 !
 !-- numerics

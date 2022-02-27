@@ -30,9 +30,6 @@ def init_argparse() -> argparse.ArgumentParser:
         "-n", "--job_name", type=str
         )
     parser.add_argument(
-        "-df", "--house_domain_fraction", type=int
-        )
-    parser.add_argument(
         "-px", "--plot_size_x", type=int
         )
     parser.add_argument(
@@ -77,12 +74,11 @@ def write_output(domain: Domain, config, job_config, ds):
 
 def parse_args(parser: argparse.ArgumentParser, kwargs):
     args = parser.parse_args()
-    kwargs = _parse_single_arg("house_domain_fraction", args, kwargs)
-    kwargs = _parse_single_arg("plot_size_x", args, kwargs)
-    kwargs = _parse_single_arg("plot_size_y", args, kwargs)
-    kwargs = _parse_single_arg("job_name", args, kwargs)
-    kwargs = _parse_single_arg("output_start_time", args, kwargs)
-    kwargs = _parse_single_arg("output_end_time", args, kwargs)
+    # kwargs = _parse_single_arg("plot_size_x", args, kwargs)
+    # kwargs = _parse_single_arg("plot_size_y", args, kwargs)
+    # kwargs = _parse_single_arg("job_name", args, kwargs)
+    # kwargs = _parse_single_arg("output_start_time", args, kwargs)
+    # kwargs = _parse_single_arg("output_end_time", args, kwargs)
     return kwargs
 
 def _parse_single_arg(arg: str, args: argparse.Namespace, kwargs):
@@ -92,18 +88,18 @@ def _parse_single_arg(arg: str, args: argparse.Namespace, kwargs):
 
 def validate_domain(domain, config):
     try:
-        assert (
-            (domain.x * domain.y) // domain.subplot.tree_domain_fraction == domain.trees_matrix.sum() if domain.subplot.tree_domain_fraction is not None
-            else 0 == domain.trees_matrix.sum()
-            ), (
-            f"Number of trees in trees matrix \n{domain.subplot.trees} \n(size: {domain.trees_matrix.sum()}) not expected number of trees: "
-            f"{(domain.x * domain.y) // domain.subplot.tree_domain_fraction}")
-        assert domain.matrix.shape == (config["domain"]["y"], config["domain"]["x"])
-        assert np.count_nonzero(domain.matrix) == (config["domain"]["y"] * config["domain"]["x"]) / config["house"]["domain_fraction"]
-        assert np.count_nonzero(domain.trees_matrix) == (
-            (config["domain"]["y"] * config["domain"]["x"]) / config["trees"]["domain_fraction"] if config["trees"]["domain_fraction"]
-            else 0
-            )
+        # assert (
+        #     (domain.x * domain.y) // domain.subplot.tree_domain_fraction == domain.trees_matrix.sum() if domain.subplot.tree_domain_fraction is not None
+        #     else 0 == domain.trees_matrix.sum()
+        #     ), (
+        #     f"Number of trees in trees matrix \n{domain.subplot.trees} \n(size: {domain.trees_matrix.sum()}) not expected number of trees: "
+        #     f"{(domain.x * domain.y) // domain.subplot.tree_domain_fraction}")
+        assert domain.matrix.shape == (config["domain"]["x"], config["domain"]["y"])
+        # assert np.count_nonzero(domain.matrix) == (config["domain"]["x"] * config["domain"]["y"]) / config["house"]["domain_fraction"]
+        # assert np.count_nonzero(domain.trees_matrix) == (
+        #     (config["domain"]["y"] * config["domain"]["x"]) / config["trees"]["domain_fraction"] if config["trees"]["domain_fraction"]
+        #     else 0
+        #     )
     except AssertionError as e:
         raise TypeError("Invalid domain configuration") from e
 
@@ -132,4 +128,4 @@ def main(**kwargs):
     return config
 
 if __name__ == "__main__":
-    print(main(house_domain_fraction=4, plot_size_x=4, plot_size_y=18, tree_domain_fraction=8))
+    print(main())
