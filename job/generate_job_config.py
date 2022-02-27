@@ -102,7 +102,7 @@ job_config = r"""
     !section_xz                = 250,260,270,280,290,300,310,320, ! grid index for 2D XZ cross sections
     
     !physics
-    omega                      = 0.0  ! Turn off coriolis
+    !omega                      = 0.0  ! Turn off coriolis
 
 / ! end of runtime parameter namelist
 
