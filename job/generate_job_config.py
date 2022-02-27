@@ -11,9 +11,9 @@ job_config = r"""
     ny                         = {domain_y},  ! Number of gridboxes in y-direction (ny+1)
     nz                         = 192,  ! Number of gridboxes in z-direction (nz)
 
-    dx                         = 5.0, ! Size of single gridbox in x-direction
-    dy                         = 5.0, ! Size of single gridbox in y-direction
-    dz                         = 5.0, ! Size of single gridbox in z-direction
+    dx                         = {dx}, ! Size of single gridbox in x-direction
+    dy                         = {dy}, ! Size of single gridbox in y-direction
+    dz                         = {dz}, ! Size of single gridbox in z-direction
 
     topography                 = 'read_from_file',              !Read Topography
     topography_grid_convention = 'cell_center', !Points in file are defined at the center of the cell
@@ -140,5 +140,7 @@ job_config = r"""
 
 def generate_job_config(config: dict):
     job_cfg = job_config.format(domain_x=config["domain"]["x"] - 1, domain_y=config["domain"]["y"] - 1,
-                                output_start_time=config["output_start_time"], output_end_time=config["output_end_time"])
+                                output_start_time=config["output_start_time"], output_end_time=config["output_end_time"],
+                                dx=config["domain"]["dx"], dy=config["domain"]["dy"], dz=config["domain"]["dz"]
+                                )
     return job_cfg
