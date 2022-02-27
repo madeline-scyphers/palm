@@ -36,7 +36,7 @@ def set_ds_attrs(ds: xr.Dataset):
         origin_x=315432.564,
         origin_y=4448144.558,
         origin_z=275.0,
-        roation_angle=0.0
+        rotation_angle=0.0
     )
     ds = ds.assign_attrs(**attrs)
     return ds
