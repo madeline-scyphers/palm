@@ -22,7 +22,7 @@ def get_new_lad(old_lad, tree_matrix, **kwargs):
 
 def get_lad_netcdf(job_name, tree_matrix, **kwargs):
     trees = tree_matrix * -1
-    new_lad_ds = generate_canopy(trees)
+    new_lad_ds = generate_canopy(trees.T)  #  todo cleanup the having to traspose things
     ds = new_lad_ds.drop(labels=["lai", "height", "patch", "flux", "DBHc"])
     return ds
 
