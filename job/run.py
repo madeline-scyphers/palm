@@ -94,7 +94,7 @@ def validate_domain(domain, config):
         #     ), (
         #     f"Number of trees in trees matrix \n{domain.subplot.trees} \n(size: {domain.trees_matrix.sum()}) not expected number of trees: "
         #     f"{(domain.x * domain.y) // domain.subplot.tree_domain_fraction}")
-        assert domain.matrix.shape == (config["domain"]["x"], config["domain"]["y"])
+        assert domain.matrix.shape == (config["domain"]["y"], config["domain"]["x"])
         # assert np.count_nonzero(domain.matrix) == (config["domain"]["x"] * config["domain"]["y"]) / config["house"]["domain_fraction"]
         # assert np.count_nonzero(domain.trees_matrix) == (
         #     (config["domain"]["y"] * config["domain"]["x"]) / config["trees"]["domain_fraction"] if config["trees"]["domain_fraction"]

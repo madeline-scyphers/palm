@@ -227,7 +227,7 @@ class Domain(BaseDomainArea):
         domain = np.where(full_domain != -1, full_domain, 0)
         trees = np.where(full_domain == -1, full_domain, 0)
         
-        return domain, trees
+        return domain.T, trees.T
 
     @classmethod
     def from_domain_config(cls, house, config):
