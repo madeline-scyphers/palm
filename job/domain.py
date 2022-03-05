@@ -1,5 +1,6 @@
 from abc import ABC, abstractmethod
 from typing import Optional
+from xml import dom
 
 import pandas as pd
 import numpy as np
@@ -8,12 +9,11 @@ from .utils import get_factors_rev
 
 
 def calc_plot_size(domain_x, domain_y, plot_goal, house_goal):
+    if domain_x == 90 and domain_y == 73:
+        print()
     f1 = sorted(get_factors_rev(domain_x))
     f2 = sorted(get_factors_rev(domain_y))
-    try:
-        plot_x, plot_y = None, None
-    except IndexError:
-        return
+    plot_x, plot_y = None, None
     for x in f1:
         for y in f2:
             if x * y - house_goal >= 0 and plot_goal - x * y >= 0:
@@ -24,9 +24,26 @@ def calc_plot_size(domain_x, domain_y, plot_goal, house_goal):
                 elif (((plot_goal - x * y) == (plot_goal - plot_x * plot_y))
                       and ((x - y) < (plot_x - plot_y))):
                     plot_x, plot_y = x, y
+            if plot_x == 1 or plot_y == 1:
+                print()
+    # if not plot_x and not plot_y:
+    #     f1.extend([1, domain_x])
+    #     f2.extend([1, domain_y])
+    #     for x in f1:
+    #         for y in f2:
+    #             if x * y - house_goal >= 0 and plot_goal - x * y >= 0:
+    #                 if not plot_x and not plot_y:
+    #                     plot_x, plot_y = x, y
+    #                 if ((plot_goal - x * y) < (plot_goal - plot_x * plot_y)):
+    #                     plot_x, plot_y = x, y 
+    #                 elif (((plot_goal - x * y) == (plot_goal - plot_x * plot_y))
+    #                     and ((x - y) < (plot_x - plot_y))):
+    #                     plot_x, plot_y = x, y
     return plot_x, plot_y
 
-def calc_plot_sizes(domain_x, domain_y, plot_footprint, house_footprint, plot_ratio, dx, dy, x_spread=(-10, 0), y_spread=(-5, 30)):
+def calc_plot_sizes(domain_x, domain_y, plot_footprint, house_footprint, plot_ratio, dx, dy, x_spread=None, y_spread=None):
+    x_spread = x_spread if x_spread is not None else (-round(domain_x / 15), 0)
+    y_spread = y_spread if y_spread is not None else (-round(domain_x / 20), round(domain_y / 10))
     goal = plot_footprint / (dx * dy)
     house_goal = house_footprint / (dx * dy)
     dom_x = range(domain_x + x_spread[0], domain_x + x_spread[1] + 1)
@@ -37,24 +54,29 @@ def calc_plot_sizes(domain_x, domain_y, plot_footprint, house_footprint, plot_ra
             # print(d_y, d_y * 0.7)
             trimmed_d_y = int(d_y * plot_ratio)
             plot_x, plot_y = calc_plot_size(d_x, trimmed_d_y, goal, house_goal)
+            if plot_x == 1 or plot_y == 1:
+                print()
             if plot_x is not None and plot_y is not None:
                 plots.append((plot_x, plot_y, d_x, d_y, trimmed_d_y))
     return plots
 
 def get_best_plot_size(plots, plot_footprint, plot_ratio, dx, dy):
     goal = plot_footprint / (dx * dy)
-    tmp = pd.DataFrame(plots, columns=["px", "py", "dx", "dy", "trimmed_dy"])
+    tmp = pd.DataFrame(plots, columns=["px", "py", "domx", "domy", "trimmed_dy"])
     tmp["plt_area"] = tmp["px"] * tmp["py"]
     tmp["goal_diff"] = goal - tmp.plt_area
-    tmp["domain_y_diff"] = tmp.dy * plot_ratio - tmp.trimmed_dy
-    tmp["trimmed_area"] = tmp["dx"] * tmp["trimmed_dy"]
-    tmp["full_domain"] = tmp["dx"] * tmp["dy"]
-    tmp["ratio_diff"] = abs((((tmp.trimmed_area + round(tmp.domain_y_diff * tmp.dx))) / tmp.full_domain - plot_ratio))
+    tmp["domain_y_diff"] = tmp.domy * plot_ratio - tmp.trimmed_dy
+    tmp["trimmed_area"] = tmp["domx"] * tmp["trimmed_dy"]
+    tmp["full_domain"] = tmp["domx"] * tmp["domy"]
+    tmp["ratio_diff"] = abs((((tmp.trimmed_area + round(tmp.domain_y_diff * tmp.domx))) / tmp.full_domain - plot_ratio))
+    normalized_ratio_diff = (tmp.ratio_diff + plot_ratio) /plot_ratio
+    normalized_goal_diff = (tmp.goal_diff + goal) /goal
+    tmp["weighted_sorter"] = (tmp.px + tmp.py ) ** (normalized_ratio_diff * normalized_goal_diff)
     # tmp["ratio_diff"] = abs(((tmp.trimmed_area) / tmp.full_domain - plot_ratio))
-    tmp = tmp.sort_values(by=["goal_diff", "ratio_diff", "domain_y_diff", "trimmed_area"], ascending=[True, True, True, False])
+    tmp = tmp.sort_values(by=["weighted_sorter", "goal_diff", "ratio_diff", "domain_y_diff", "trimmed_area"], ascending=[True, True, True, True, False])
     # tmp = tmp.sort_values(by=["goal_diff", "domain_y_diff", "trimmed_area"], ascending=[True, True, False])
 
-    tplot_x, tplot_y, tdomain_x, tdomain_y, trimmed_y = tmp[["px", "py", "dx", "dy", "trimmed_dy"]].iloc[0]
+    tplot_x, tplot_y, tdomain_x, tdomain_y, trimmed_y = tmp[["px", "py", "domx", "domy", "trimmed_dy"]].iloc[0]
 
     return tplot_x, tplot_y, tdomain_x, tdomain_y, trimmed_y
 
@@ -116,26 +138,15 @@ class House(BaseDomainArea):
     def get_matrix(self) -> np.ndarray:
         house = np.full((self.x, self.y), self.z)
         return house
-        # house = np.full((self.y + 2 * self.y_padding, self.x + 2 * self.x_padding), self.z, dtype = int)
-        # house[:,[*np.arange(self.x_padding).tolist(), *(-(np.arange(self.x_padding) + 1)).tolist()]] = 0
-        # house[[*np.arange(self.y_padding).tolist(), *(-(np.arange(self.y_padding) + 1)).tolist()]] = 0
-        # return house
 
-class Road:
-    pass
 
 class Cell(BaseDomainArea):
     def __init__(self, subplot: House, x: int, y: int) -> None:
         self.subplot = subplot
         self.x = x
         self.y = y
-        # self.tree_domain_fraction = tree_domain_fraction
         self._validate_matrix_size(subplot=self.subplot)
         self.matrix = self.get_matrix()
-        # self.trees = self.get_trees()
-        
-        # if np.max(self.matrix + self.trees) > np.max(self.matrix):
-            # raise TypeError("Invalid Configuration, Only valid configuration found when trees overlap with house matrix")
 
     def get_matrix(self) -> np.ndarray:
         left = (self.x - self.subplot.x) // 2
@@ -144,41 +155,7 @@ class Cell(BaseDomainArea):
         plot[left:left + self.subplot.x, top:top + self.subplot.y] = self.subplot.matrix
         
         return plot
-    
-    def calc_perimeter(self, x: int, y: int):
-        # offset = 4
-        # inset_min, inset_max = x, self.matrix.shape[0] - x
-        return 2 * x + 2 * y - 4
 
-    # def get_trees(self):
-    #     no_of_trees = self.matrix.size // self.tree_domain_fraction if self.tree_domain_fraction is not None else 0
-    #     perimeter = self.calc_perimeter(self.x, self.y)
-
-    #     trees_fence = self.set_fence(no_of_trees)
-    #     return trees_fence
-
-    # def set_fence(self, no_of_trees):
-    #     a = np.zeros((self.y, self.x), dtype=int)
-        
-    #     for step in range(1, min(a.shape) // 2):
-    #         a = self._set_fence(np.zeros((self.y, self.x), dtype=int), step)
-    #         if a.sum() >= no_of_trees:
-    #             break
-    #     else:
-    #         raise TypeError("Invalid number of trees")
-        
-    #     perimeter = a.sum()
-        
-    #     perim_locations = np.linspace(0, perimeter, num=no_of_trees, endpoint=False, dtype=int)
-    #     perim_inds = np.where(a[a == 1])[0]
-    #     a[a == 1] = np.where(np.isin(perim_inds, perim_locations), 1, 0)
-    #     return a
-
-    @staticmethod
-    def _set_fence(a, step=0):
-        a[((np.arange(0,step), np.arange(-step,0))),] = 1
-        a[:,((np.arange(0,step), np.arange(-step,0)))] = 1
-        return a
 
 class Domain(BaseDomainArea):
     def __init__(self, subplot: Cell, tdomain_x, tdomain_y, full_x, full_y, trimmed_y, plot_ratio) -> None:
@@ -253,13 +230,11 @@ def setup_domain(cfg):
     house = House(house_x, house_y, cfg["house"]["height"])
 
     return Domain.from_plot_size(house, cfg, tplot_x, tplot_y, tdomain_x, tdomain_y, trimmed_y, plot_ratio)
-    # return Domain.from_domain_config(house, cfg)
 
 
 if __name__ == "__main__":
-    from .load_run_config import default_config
-    config = default_config(
-        # tree_domain_fraction=4,
+    from .load_wrapper_config import get_wrapper_config
+    config = get_wrapper_config(
     )
     domain = setup_domain(config)
-    
+    domain

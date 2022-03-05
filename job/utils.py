@@ -17,8 +17,11 @@ def factors(nr) -> list[int]:
     return factors
 
 
-def get_factors_rev(n: int) -> Iterator[int]:
-    for i in range(int(n**0.5) + 1, 1, -1):
+def get_factors_rev(n: int, explude_one=False) -> Iterator[int]:
+    end = 0
+    if explude_one:
+        end = 1
+    for i in range(int(n**0.5) + 1, end, -1):
         if n % i == 0:
             for num in [i, n//i]:
                 yield num

@@ -4,7 +4,7 @@ import json
 import numpy as np
 
 from .domain import Domain, House, Cell, setup_domain
-from .load_run_config import default_config, USER_CODE_MODULE
+from .load_wrapper_config import get_wrapper_config, USER_CODE_MODULE
 from .generate_canopy import get_lad_netcdf
 from .utils import get_factors_rev, make_dirs
 from .generate_job_config import generate_job_config
@@ -108,7 +108,7 @@ def get_config(**kwargs):
     
     kwargs = parse_args(parser, kwargs)
 
-    config = default_config(**kwargs)
+    config = get_wrapper_config(**kwargs)
     return config
 
 def create_input_files(config):
