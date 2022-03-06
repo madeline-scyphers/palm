@@ -37,6 +37,33 @@ summary = """
 """
 
 def main():
+    
+    
+    
+    params = [
+        {'plot_footprint': 793, 'house_ratio': 0.23399696312844753, 'ground_ratio': 0.712415256537497, 'mean_lai': 3.5729792695492506, 'domain_x': 48, 'domain_y': 144},
+        {'plot_footprint': 883, 'house_ratio': 0.13372371066361666, 'ground_ratio': 0.4194803750142455, 'mean_lai': 4.488054119050503, 'domain_x': 48, 'domain_y': 144},
+        {'plot_footprint': 453, 'house_ratio': 0.10799476783722639, 'ground_ratio': 0.5507028270512819, 'mean_lai': 2.088366985321045, 'domain_x': 48, 'domain_y': 144},
+        {'plot_footprint': 689, 'house_ratio': 0.1954153785482049, 'ground_ratio': 0.7948569608852267, 'mean_lai': 4.824529131874442, 'domain_x': 48, 'domain_y': 144},
+        {'plot_footprint': 998, 'house_ratio': 0.35983916465193033, 'ground_ratio': 0.601067315787077, 'mean_lai': 3.9796842988580465, 'domain_x': 48, 'domain_y': 144},
+        {'plot_footprint': 382, 'house_ratio': 0.39648958947509527, 'ground_ratio': 0.4932594681158662, 'mean_lai': 3.4438284914940596, 'domain_x': 48, 'domain_y': 144},
+        {'plot_footprint': 398, 'house_ratio': 0.2549444977194071, 'ground_ratio': 0.6947077717632055, 'mean_lai': 2.934372689574957, 'domain_x': 48, 'domain_y': 144},
+        {'plot_footprint': 603, 'house_ratio': 0.1513266609981656, 'ground_ratio': 0.6187597988173366, 'mean_lai': 3.141808945685625, 'domain_x': 48, 'domain_y': 144},
+        {'plot_footprint': 863, 'house_ratio': 0.12163377087563276, 'ground_ratio': 0.47654380463063717, 'mean_lai': 4.094223972409964, 'domain_x': 48, 'domain_y': 144},
+        {'plot_footprint': 664, 'house_ratio': 0.3460772568359971, 'ground_ratio': 0.4252256229519844, 'mean_lai': 2.349442543461919, 'domain_x': 48, 'domain_y': 144},
+        {'plot_footprint': 760, 'house_ratio': 0.3790088286623359, 'ground_ratio': 0.5439812364056706, 'mean_lai': 4.414590263739228, 'domain_x': 48, 'domain_y': 144},
+        {'plot_footprint': 527, 'house_ratio': 0.32524664606899023, 'ground_ratio': 0.5201046532019973, 'mean_lai': 4.965688589960337, 'domain_x': 48, 'domain_y': 144},
+        {'plot_footprint': 652, 'house_ratio': 0.17734538298100233, 'ground_ratio': 0.4671788774430752, 'mean_lai': 3.5196363795548677, 'domain_x': 48, 'domain_y': 144},
+        {'plot_footprint': 726, 'house_ratio': 0.081920494325459, 'ground_ratio': 0.5625117057934403, 'mean_lai': 2.9663737509399652, 'domain_x': 48, 'domain_y': 144},
+        {'plot_footprint': 447, 'house_ratio': 0.291501235216856, 'ground_ratio': 0.3443353408947587, 'mean_lai': 4.056293407455087, 'domain_x': 48, 'domain_y': 144},
+        {'plot_footprint': 388, 'house_ratio': 0.2059640735387802, 'ground_ratio': 0.6664238292723894, 'mean_lai': 4.48176146671176, 'domain_x': 48, 'domain_y': 144},
+        {'plot_footprint': 960, 'house_ratio': 0.3428603848442435, 'ground_ratio': 0.43801200669258833, 'mean_lai': 2.845814563333988, 'domain_x': 48, 'domain_y': 144},
+        {'plot_footprint': 1008, 'house_ratio': 0.1635807929560542, 'ground_ratio': 0.5102092549204826, 'mean_lai': 2.6161319818347692, 'domain_x': 48, 'domain_y': 144},
+        {'plot_footprint': 414, 'house_ratio': 0.06442751456052065, 'ground_ratio': 0.3946055443957448, 'mean_lai': 4.71040384285152, 'domain_x': 48, 'domain_y': 144},
+        {'plot_footprint': 869, 'house_ratio': 0.3050725869834423, 'ground_ratio': 0.6763042481616139, 'mean_lai': 2.3079389464110136, 'domain_x': 48, 'domain_y': 144},
+]
+    for param in params:
+        run_job(**param)
 
     # plot_width_factors = 2,2,2,2,2,3
 
@@ -53,7 +80,7 @@ def main():
     #         run_job(plot_width, plot_height)
     
 
-    run_job()
+    # run_job()
     # run_job(2, 12, tree_domain_fraction=4)
     # run_job(4, 4, tree_domain_fraction=4)
     # run_job(4, 8, tree_domain_fraction=4)

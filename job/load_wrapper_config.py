@@ -25,9 +25,9 @@ del current_dir
 
 def get_wrapper_config(
         domain_x=int(192 / 4),
-        domain_y=int(432 / 4),
+        domain_y=int(432 / 3),
         dx=3 * 4,
-        dy=3 * 4,
+        dy=3 * 3,
         dz=3,
         urban_ratio=0.8,
         # house_plot_ratio=2/7,
