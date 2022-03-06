@@ -24,20 +24,25 @@ del current_dir
 
 
 def get_wrapper_config(
-        domain_x=int(192 / 6),
-        domain_y=int(432 / 6),
-        dx=3 * 6,
-        dy=3 * 6,
+        domain_x=int(192 / 4),
+        domain_y=int(432 / 4),
+        dx=3 * 4,
+        dy=3 * 4,
         dz=3,
         urban_ratio=0.8,
-        house_plot_ratio=2/7,
+        # house_plot_ratio=2/7,
         plot_footprint=700,
-        plot_ratio=0.70,
+        # plot_ratio=0.70,
+        ground_ratio=.5,
+        house_ratio=.2,
+        mean_lai=3,
         output_start_time=0,
         output_end_time=300,
         template_path=TEMPLATE_DIR,
         job_name=None):
     job_name = job_name if job_name is not None else dt.datetime.now().strftime("%Y%m%dT%H%M%S")
+    plot_ratio = ground_ratio + house_ratio
+    house_plot_ratio = house_ratio / plot_ratio
     config = {
         "job_name": job_name,
         "output_start_time": output_start_time,
@@ -59,5 +64,6 @@ def get_wrapper_config(
             "plot_footprint": plot_footprint,
             "plot_ratio": plot_ratio
         },
+        "canopy": {"mean_lai": mean_lai}
     }
     return config

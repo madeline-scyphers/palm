@@ -1,7 +1,5 @@
 from __future__ import annotations
 
-from pathlib import Path
-
 
 def generate_job_config(config: dict) -> dict:
     with open(config["template_path"]) as template:
