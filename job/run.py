@@ -74,7 +74,7 @@ def write_output(domain: Domain, config, job_config, ds):
 
 def parse_args(parser: argparse.ArgumentParser, kwargs):
     args = parser.parse_args()
-    # kwargs = _parse_single_arg("plot_size_x", args, kwargs)
+    kwargs = _parse_single_arg("plot_size_x", args, kwargs)
     # kwargs = _parse_single_arg("plot_size_y", args, kwargs)
     # kwargs = _parse_single_arg("job_name", args, kwargs)
     # kwargs = _parse_single_arg("output_start_time", args, kwargs)

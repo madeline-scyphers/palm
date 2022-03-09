@@ -1,0 +1,11 @@
+name: palm
+
+dependencies:
+  - pyyaml
+  - numpy
+  - pandas
+  - scipy
+  - xarray
+  - pytest
+  - black
+  - isort

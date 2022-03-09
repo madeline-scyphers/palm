@@ -4,6 +4,7 @@ data_analyzer/input
 *.nc
 *static
 *.log
+data/
 
 #################################################
 # Various Python files for different work flows #
@@ -127,6 +128,9 @@ venv.bak/
 
 # jetrains settings
 .idea
+
+# vscode settings
+.vscode
 
 # Rope project settings
 .ropeproject
