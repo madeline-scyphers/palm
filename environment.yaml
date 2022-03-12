@@ -1,6 +1,9 @@
 name: palm
-
+channels:
+  - conda-forge
+  - defaults
 dependencies:
+  - python=3.9
   - pyyaml
   - numpy
   - pandas
@@ -10,4 +13,6 @@ dependencies:
   - black
   - isort
   - jupyterlab
+  - jupyter
   - numexpr
+  - dask
