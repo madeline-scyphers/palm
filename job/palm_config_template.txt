@@ -96,7 +96,7 @@
     !dt_do2d_xz                = 100.0,  ! output interval for xz data
     !dt_do2d_yz                = 100.0,  ! output interval for yz data
 
-    data_output                = 'theta', 'v', 'w', 'u', 's'
+    data_output                = 'theta', 'v', 'w', 'u', 's', wspeed, us*, uu, vv, ww
                                  !'u_xy','v_xy','w_xy','s_xy',
                                  !'u_yz','v_yz','w_yz','s_yz',
                                  !'u_xz','v_xz','w_xz','s_xz'
