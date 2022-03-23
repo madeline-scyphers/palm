@@ -20,30 +20,17 @@ def calc_plot_size(domain_x, domain_y, plot_goal, house_goal):
                 if not plot_x and not plot_y:
                     plot_x, plot_y = x, y
                 if ((plot_goal - x * y) < (plot_goal - plot_x * plot_y)):
-                    plot_x, plot_y = x, y 
+                    plot_x, plot_y = x, y
                 elif (((plot_goal - x * y) == (plot_goal - plot_x * plot_y))
                       and ((x - y) < (plot_x - plot_y))):
                     plot_x, plot_y = x, y
             if plot_x == 1 or plot_y == 1:
                 print()
-    # if not plot_x and not plot_y:
-    #     f1.extend([1, domain_x])
-    #     f2.extend([1, domain_y])
-    #     for x in f1:
-    #         for y in f2:
-    #             if x * y - house_goal >= 0 and plot_goal - x * y >= 0:
-    #                 if not plot_x and not plot_y:
-    #                     plot_x, plot_y = x, y
-    #                 if ((plot_goal - x * y) < (plot_goal - plot_x * plot_y)):
-    #                     plot_x, plot_y = x, y 
-    #                 elif (((plot_goal - x * y) == (plot_goal - plot_x * plot_y))
-    #                     and ((x - y) < (plot_x - plot_y))):
-    #                     plot_x, plot_y = x, y
     return plot_x, plot_y
 
-def calc_plot_sizes(domain_x, domain_y, plot_footprint, house_footprint, plot_ratio, dx, dy, x_spread=None, y_spread=None):
+def calc_plot_sizes(domain_x, domain_y, plot_footprint, house_footprint, plot_ratio, dx, dy, full_domain, x_spread=None, y_spread=None):
     x_spread = x_spread if x_spread is not None else (-round(domain_x / 15), 0)
-    y_spread = y_spread if y_spread is not None else (-round(domain_x / 20), round(domain_y / 10))
+    y_spread = y_spread if y_spread is not None else (-round(domain_y / 20), min(full_domain - domain_y, round(domain_y / 10)))
     goal = plot_footprint / (dx * dy)
     house_goal = house_footprint / (dx * dy)
     dom_x = range(domain_x + x_spread[0], domain_x + x_spread[1] + 1)
@@ -94,7 +81,7 @@ def calc_house_size(plot_x, plot_y, house_footprint, dx, dy):
                 continue
             if (abs(goal - padded_x * padded_y)  < abs(goal - true_x * true_y)):
                 true_x, true_y = padded_x, padded_y
-            elif ((abs(goal - padded_x * padded_y)  == abs(goal - true_x * true_y)) 
+            elif ((abs(goal - padded_x * padded_y)  == abs(goal - true_x * true_y))
                   and (abs(padded_x - padded_y) < abs(true_x - true_y))):
                 true_x, true_y = padded_x, padded_y
     return true_x, true_y
@@ -123,7 +110,7 @@ class BaseDomainArea(ABC):
             if subplot_val and cell_val < subplot_val:
                 raise ValueError(f"The {value} ({cell_val}) value of {self.__class__.__name__}"
                                  f" must be larger than the house ({subplot_val}) going on it!")
-                
+
     def save_matrix(self, filename: str, matrix_name: str = None) -> None:
         matrix = self.matrix if matrix_name is None else getattr(self, matrix_name)
         np.savetxt(filename, matrix, delimiter=",")
@@ -153,7 +140,7 @@ class Cell(BaseDomainArea):
         top = (self.y - self.subplot.y) // 2
         plot =  np.zeros((self.x, self.y), dtype=int)
         plot[left:left + self.subplot.x, top:top + self.subplot.y] = self.subplot.matrix
-        
+
         return plot
 
 
@@ -168,22 +155,22 @@ class Domain(BaseDomainArea):
         self.plot_ratio = plot_ratio
         # self._validate_matrix_size(subplot=self.subplot)
         self.matrix, self.trees_matrix = self.get_matrix()
-    
+
     def print_tree_matrix(self) -> str:
         string = ""
-        for row in self.trees_matrix: 
+        for row in self.trees_matrix:
             string += f'{" ".join(str(int(pixel)) for pixel in row)}\n'
         return string
 
     def get_matrix(self) -> np.ndarray:
         houses_row = np.tile(self.subplot.matrix, (self.temp_x // self.subplot.x, 1,))
         number_of_house_rows = self.trimmed_y // self.subplot.y
-        number_of_full_tree_rows = int(self.temp_y * (1 - self.plot_ratio))
+        number_of_full_tree_rows = self.temp_y - self.trimmed_y - 1
         mixed_row_ratio = self.temp_y * self.plot_ratio - self.trimmed_y
-        
+
         tree_row = np.full((self.temp_x, 1), -1)
         mixed_row = np.array([-1 if i <= mixed_row_ratio * self.temp_x else 0 for i in range(1, self.temp_x + 1)]).reshape(self.temp_x, 1)
-        
+
         rows = [[houses_row.copy()] for _ in range(number_of_house_rows)]
         trees = [tree_row.copy() for _ in range(number_of_full_tree_rows)]
         trees.insert(number_of_house_rows // 2, mixed_row)
@@ -193,17 +180,17 @@ class Domain(BaseDomainArea):
                     break
                 row.append(trees.pop())
 
-            
+
         domain_with_trees = np.concatenate([np.concatenate(row, axis=1) for row in rows], axis=1)
-        
+
         dwtx = domain_with_trees.shape[0]
         dwty = domain_with_trees.shape[1]
         xs = int(np.floor((self.full_x - dwtx) / 2)), int(np.ceil((self.full_x - dwtx) / 2))
         full_domain = np.pad(domain_with_trees, (xs, (self.full_y - dwty, 0)))
-        
+
         domain = np.where(full_domain != -1, full_domain, 0)
         trees = np.where(full_domain == -1, full_domain, 0)
-        
+
         return domain.T, trees.T
 
     @classmethod
@@ -212,18 +199,18 @@ class Domain(BaseDomainArea):
         x = config["domain"]["x"]
         y = config["domain"]["y"]
         return cls(subplot=cell, x=x, y=y)
-    
+
     @classmethod
     def from_plot_size(cls, house, config, tplot_x, tplot_y, tdomain_x, tdomain_y, trimmed_y, plot_ratio):
         cell = Cell(house, x=tplot_x, y=tplot_y)
         # x = config["domain"]["x"]
         # y = config["domain"]["y"]
         return cls(cell, tdomain_x, tdomain_y, config["domain"]["x"], config["domain"]["y"], trimmed_y, plot_ratio)
-    
+
 def setup_domain(cfg):
     domain_x, domain_y = cfg["domain"]["x"], (round(cfg["domain"]["y"] * cfg["domain"]["urban_ratio"]))
     plot_footprint, plot_ratio, dx, dy = cfg["plot"]["plot_footprint"], cfg["plot"]["plot_ratio"], cfg["domain"]["dx"], cfg["domain"]["dy"]
-    plots = calc_plot_sizes(domain_x, domain_y, plot_footprint, cfg["house"]["footprint"], plot_ratio, dx, dy,)
+    plots = calc_plot_sizes(domain_x, domain_y, plot_footprint, cfg["house"]["footprint"], plot_ratio, dx, dy, cfg["domain"]["y"],)
     tplot_x, tplot_y, tdomain_x, tdomain_y, trimmed_y = get_best_plot_size(plots, plot_footprint, plot_ratio, dx, dy)
     house_x, house_y = calc_house_size(tplot_x, tplot_y, cfg["house"]["footprint"], dx, dy)
 

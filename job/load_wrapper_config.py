@@ -29,7 +29,7 @@ def get_wrapper_config(
         dx=3,
         dy=3,
         dz=3,
-        urban_ratio=0.5,
+        urban_ratio=.5,
         # house_plot_ratio=2/7,
         plot_footprint=700,
         # plot_ratio=0.70,

@@ -22,9 +22,9 @@ OUTPUT_START_TIME = 6 * ONE_HOUR
 OUTPUT_END_TIME = 6 * ONE_HOUR + TEN_MIN
 
 OUTPUT_START_TIME = 0
-OUTPUT_END_TIME = 6 * ONE_MIN
+OUTPUT_END_TIME = 30 * ONE_MIN
 
-JOB_RUN_TIMEOUT_SCALER = 4
+JOB_RUN_TIMEOUT_SCALER = 6
 
 log_dir = Path().resolve() / "logs"
 log_dir.mkdir(exist_ok=True)
@@ -47,28 +47,28 @@ def main():
 
     params = [
         {'plot_footprint': 366, 'house_ratio': 0.17704884335398674, 'ground_ratio': 0.508383123204112, 'mean_lai': 3.1202627243474126},
-#         {'plot_footprint': 779, 'house_ratio': 0.29129079822450876, 'ground_ratio': 0.5895595084875822, 'mean_lai': 4.535055342130363},
-#         {'plot_footprint': 461, 'house_ratio': 0.10465617198497057, 'ground_ratio': 0.43243145383894444, 'mean_lai': 4.513731939718127},
-#         {'plot_footprint': 731, 'house_ratio': 0.15050092432647943, 'ground_ratio': 0.7963994303718209, 'mean_lai': 2.6298176627606153},
-#         {'plot_footprint': 566, 'house_ratio': 0.08257363922894001, 'ground_ratio': 0.5652173357084394, 'mean_lai': 2.431219285354018},
-#         {'plot_footprint': 941, 'house_ratio': 0.44876968022435904, 'ground_ratio': 0.5174893783405423, 'mean_lai': 3.910500142723322},
-#         {'plot_footprint': 1037, 'house_ratio': 0.27141167782247066, 'ground_ratio': 0.4098602244630456, 'mean_lai': 2.493575076572597},
-#         {'plot_footprint': 863, 'house_ratio': 0.19023516401648521, 'ground_ratio': 0.7306853020563722, 'mean_lai': 3.654823502525687},
-#         {'plot_footprint': 876, 'house_ratio': 0.12096619512885809, 'ground_ratio': 0.8494819048792124, 'mean_lai': 2.924783040769398},
-#         {'plot_footprint': 623, 'house_ratio': 0.13565291743725538, 'ground_ratio': 0.48493407759815454, 'mean_lai': 4.037136648781598},
-#         {'plot_footprint': 963, 'house_ratio': 0.08621279243379831, 'ground_ratio': 0.4492392996326089, 'mean_lai': 3.8059845492243767},
+        {'plot_footprint': 779, 'house_ratio': 0.29129079822450876, 'ground_ratio': 0.5895595084875822, 'mean_lai': 4.535055342130363},
+        {'plot_footprint': 461, 'house_ratio': 0.10465617198497057, 'ground_ratio': 0.43243145383894444, 'mean_lai': 4.513731939718127},
+        {'plot_footprint': 731, 'house_ratio': 0.15050092432647943, 'ground_ratio': 0.7963994303718209, 'mean_lai': 2.6298176627606153},
+        {'plot_footprint': 566, 'house_ratio': 0.08257363922894001, 'ground_ratio': 0.5652173357084394, 'mean_lai': 2.431219285354018},
+        {'plot_footprint': 941, 'house_ratio': 0.44876968022435904, 'ground_ratio': 0.5174893783405423, 'mean_lai': 3.910500142723322},
+        {'plot_footprint': 1037, 'house_ratio': 0.27141167782247066, 'ground_ratio': 0.4098602244630456, 'mean_lai': 2.493575076572597},
+        {'plot_footprint': 863, 'house_ratio': 0.19023516401648521, 'ground_ratio': 0.7306853020563722, 'mean_lai': 3.654823502525687},
+        {'plot_footprint': 876, 'house_ratio': 0.12096619512885809, 'ground_ratio': 0.8494819048792124, 'mean_lai': 2.924783040769398},
+        {'plot_footprint': 623, 'house_ratio': 0.13565291743725538, 'ground_ratio': 0.48493407759815454, 'mean_lai': 4.037136648781598},
+        {'plot_footprint': 963, 'house_ratio': 0.08621279243379831, 'ground_ratio': 0.4492392996326089, 'mean_lai': 3.8059845492243767},
 # # I think this is as far as it got
 
 
-#         {'plot_footprint': 408, 'house_ratio': 0.20121390279382467, 'ground_ratio': 0.3466413440182805, 'mean_lai': 2.6082018688321114},
-#         {'plot_footprint': 580, 'house_ratio': 0.274577927775681, 'ground_ratio': 0.5444309758022428, 'mean_lai': 3.743815534748137},
-#         {'plot_footprint': 912, 'house_ratio': 0.1310371831059456, 'ground_ratio': 0.6234120326116681, 'mean_lai': 2.2229125713929534},
-#         {'plot_footprint': 818, 'house_ratio': 0.1811916744336486, 'ground_ratio': 0.38119750656187534, 'mean_lai': 4.640058918856084},
-#         {'plot_footprint': 487, 'house_ratio': 0.28765164501965046, 'ground_ratio': 0.4584666881710291, 'mean_lai': 3.2013245234265924},
-#         {'plot_footprint': 665, 'house_ratio': 0.23602234572172165, 'ground_ratio': 0.6513172406703234, 'mean_lai': 4.269555360078812},
-#         {'plot_footprint': 717, 'house_ratio': 0.10148992203176022, 'ground_ratio': 0.5507906954735518, 'mean_lai': 3.2224684804677963},
-#         {'plot_footprint': 977, 'house_ratio': 0.22761376574635506, 'ground_ratio': 0.5400458388030529, 'mean_lai': 2.6904906583949924},
-#         {'plot_footprint': 799, 'house_ratio': 0.3107391279190779, 'ground_ratio': 0.35014111176133156, 'mean_lai': 3.8487979527562857},
+        {'plot_footprint': 408, 'house_ratio': 0.20121390279382467, 'ground_ratio': 0.3466413440182805, 'mean_lai': 2.6082018688321114},
+        {'plot_footprint': 580, 'house_ratio': 0.274577927775681, 'ground_ratio': 0.5444309758022428, 'mean_lai': 3.743815534748137},
+        {'plot_footprint': 912, 'house_ratio': 0.1310371831059456, 'ground_ratio': 0.6234120326116681, 'mean_lai': 2.2229125713929534},
+        {'plot_footprint': 818, 'house_ratio': 0.1811916744336486, 'ground_ratio': 0.38119750656187534, 'mean_lai': 4.640058918856084},
+        {'plot_footprint': 487, 'house_ratio': 0.28765164501965046, 'ground_ratio': 0.4584666881710291, 'mean_lai': 3.2013245234265924},
+        {'plot_footprint': 665, 'house_ratio': 0.23602234572172165, 'ground_ratio': 0.6513172406703234, 'mean_lai': 4.269555360078812},
+        {'plot_footprint': 717, 'house_ratio': 0.10148992203176022, 'ground_ratio': 0.5507906954735518, 'mean_lai': 3.2224684804677963},
+        {'plot_footprint': 977, 'house_ratio': 0.22761376574635506, 'ground_ratio': 0.5400458388030529, 'mean_lai': 2.6904906583949924},
+        {'plot_footprint': 799, 'house_ratio': 0.3107391279190779, 'ground_ratio': 0.35014111176133156, 'mean_lai': 3.8487979527562857},
 ]
     for param in params:
         run_job(**param)

@@ -7,7 +7,7 @@ from .domain import Domain, House, Cell, setup_domain
 from .load_wrapper_config import get_wrapper_config, USER_CODE_MODULE
 from .generate_canopy import get_lad_netcdf
 from .utils import get_factors_rev, make_dirs
-from .generate_job_config import generate_job_config
+from .generate_job_config import generate_job_config, generate_user_module
 from definitions import JOBS_DIR
 from __version__ import __version__ as VERSION
 
@@ -43,26 +43,27 @@ def init_argparse() -> argparse.ArgumentParser:
         )
 
     return parser
-    
+
 def write_output(domain: Domain, config, job_config, ds):
-    
+
     jobs = JOBS_DIR / config['job_name']
     input_path = jobs / "INPUT"
     user_code_path = jobs / "USER_CODE"
     wrapper_config_path = jobs / "wrapper_config"
     dir_to_make = [input_path, user_code_path, wrapper_config_path]
     make_dirs(dir_to_make)
-    
+
     with open(input_path / f"{config['job_name']}_topo", "w") as f:
         f.write(str(domain))
-        
+
     with open(input_path / f"{config['job_name']}_p3d", "w") as f:
         f.write(job_config)
-        
+
     with open(user_code_path / "user_module.f90", "w") as f:
-        user_code_module = open(USER_CODE_MODULE).read()
+        # user_code_module = open(USER_CODE_MODULE).read()
+        user_code_module = generate_user_module(domain)
         f.write(user_code_module)
-        
+
     ds.to_netcdf(input_path / f"{config['job_name']}_static", format="NETCDF3_64BIT")
 
     domain.save_matrix(wrapper_config_path / "topo.csv")
@@ -74,7 +75,7 @@ def write_output(domain: Domain, config, job_config, ds):
 
 def parse_args(parser: argparse.ArgumentParser, kwargs):
     args = parser.parse_args()
-    kwargs = _parse_single_arg("plot_size_x", args, kwargs)
+    # kwargs = _parse_single_arg("plot_size_x", args, kwargs)
     # kwargs = _parse_single_arg("plot_size_y", args, kwargs)
     # kwargs = _parse_single_arg("job_name", args, kwargs)
     # kwargs = _parse_single_arg("output_start_time", args, kwargs)
@@ -105,7 +106,7 @@ def validate_domain(domain, config):
 
 def get_config(**kwargs):
     parser = init_argparse()
-    
+
     kwargs = parse_args(parser, kwargs)
 
     config = get_wrapper_config(**kwargs)
@@ -120,11 +121,11 @@ def create_input_files(config):
     write_output(domain, config, job_config, ds)
 
 def main(**kwargs):
-    
+
     config = get_config(**kwargs)
 
     create_input_files(config)
-    
+
     return config
 
 if __name__ == "__main__":

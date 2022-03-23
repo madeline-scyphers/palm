@@ -19,40 +19,40 @@
 !
 ! Current revisions:
 ! -----------------
-! 
-! 
+!
+!
 ! Former revisions:
 ! -----------------
 ! $Id: user_module.f90 4346 2019-12-18 11:55:56Z motisi $
 ! Introduction of wall_flags_total_0, which currently sets bits based on static
 ! topography information used in wall_flags_static_0
-! 
+!
 ! 4329 2019-12-10 15:46:36Z motisi
 ! Renamed wall_flags_0 to wall_flags_static_0
-! 
+!
 ! 4287 2019-11-01 14:50:20Z raasch
 ! reading of namelist file and actions in case of namelist errors revised so that statement labels
 ! and goto statements are not required any more; this revision also removes a previous bug
 ! which appeared when the namelist has been commented out in the namelist file
-! 
+!
 ! 4182 2019-08-22 15:20:23Z scharf
 ! Corrected "Former revisions" section
-! 
+!
 ! 3986 2019-05-20 14:08:14Z Giersch
 ! Redundant integration of control parameters in user_rrd_global removed
-! 
+!
 ! 3911 2019-04-17 12:26:19Z knoop
 ! Bugfix: added before_prognostic_equations case in user_actions
-! 
+!
 ! 3768 2019-02-27 14:35:58Z raasch
 ! variables commented + statements added to avoid compiler warnings about unused variables
 !
 ! 3767 2019-02-27 08:18:02Z raasch
 ! unused variable for file index removed from rrd-subroutines parameter list
-! 
+!
 ! 3747 2019-02-16 15:15:23Z gronemeier
 ! Add routine user_init_arrays
-! 
+!
 ! 3703 2019-01-29 16:43:53Z knoop
 ! An example for a user defined global variable has been added (Giersch)
 !
@@ -86,14 +86,14 @@
 
     IMPLICIT NONE
 
-    INTEGER(iwp) ::  dots_num_palm   !< 
-    INTEGER(iwp) ::  dots_num_user = 0  !< 
-    INTEGER(iwp) ::  user_idummy     !< 
-    
-    LOGICAL ::  user_module_enabled = .FALSE.   !< 
-    
-    REAL(wp) ::  user_rdummy   !< 
-    
+    INTEGER(iwp) ::  dots_num_palm   !<
+    INTEGER(iwp) ::  dots_num_user = 0  !<
+    INTEGER(iwp) ::  user_idummy     !<
+
+    LOGICAL ::  user_module_enabled = .FALSE.   !<
+
+    REAL(wp) ::  user_rdummy   !<
+
     !REAL(wp) ::  Canopy1_edge_north  =  0.0_wp    !< left edge of canopy in meters
     !REAL(wp) ::  Canopy1_edge_south  =  0.0_wp    !< right edge of canopy in meters
     !REAL(wp) ::  Canopy1_edge_left   =  0.0_wp    !< left edge of canopy in meters
@@ -104,11 +104,11 @@
     !REAL(wp) ::  Canopy2_edge_left   =  0.0_wp    !< left edge of canopy in meters
     !REAL(wp) ::  Canopy2_edge_right  =  0.0_wp    !< right edge of canopy in meters
 
- 
+
 
 !
 !-- Sample for user-defined output
-!    REAL(wp) :: global_parameter !< user defined global parameter 
+!    REAL(wp) :: global_parameter !< user defined global parameter
 !
 !    REAL(wp), DIMENSION(:,:,:), ALLOCATABLE ::  u2       !< user defined array
 !    REAL(wp), DIMENSION(:,:,:), ALLOCATABLE ::  u2_av    !< user defined array
@@ -237,14 +237,14 @@
 
     INTEGER(iwp) ::  i                 !<
     INTEGER(iwp) ::  io_status         !< status after reading the namelist file
-    INTEGER(iwp) ::  j                 !< 
+    INTEGER(iwp) ::  j                 !<
 
 
     NAMELIST /user_parameters/                                                                     &
        data_output_masks_user,                                                                     &
        data_output_pr_user,                                                                        &
        data_output_user,                                                                           &
-       region                                                                                     
+       region
        !Canopy1_edge_north,Canopy1_edge_south,Canopy1_edge_left,Canopy1_edge_right,                 &
        !Canopy2_edge_north,Canopy2_edge_south,Canopy2_edge_left,Canopy2_edge_right
 
@@ -316,7 +316,7 @@
  SUBROUTINE user_check_parameters
 
 
-!-- Here the user may add code to check the validity of further &userpar 
+!-- Here the user may add code to check the validity of further &userpar
 !-- control parameters or deduce further quantities.
 
 
@@ -379,8 +379,8 @@
     USE profil_parameter
 
 
-    CHARACTER (LEN=*) ::  unit     !< 
-    CHARACTER (LEN=*) ::  variable !< 
+    CHARACTER (LEN=*) ::  unit     !<
+    CHARACTER (LEN=*) ::  variable !<
     CHARACTER (LEN=*) ::  dopr_unit !< local value of dopr_unit
 
 !    INTEGER(iwp) ::  user_pr_index !<
@@ -431,7 +431,7 @@
  SUBROUTINE user_check_data_output( variable, unit )
 
 
-    CHARACTER (LEN=*) ::  unit     !< 
+    CHARACTER (LEN=*) ::  unit     !<
     CHARACTER (LEN=*) ::  variable !<
 
 
@@ -476,7 +476,7 @@
 !-- Example for defining a statistic region:
 !     IF ( statistic_regions >= 1 )  THEN
 !        region = 1
-! 
+!
 !        rmask(:,:,region) = 0.0_wp
 !        DO  i = nxl, nxr
 !           IF ( i >= INT( 0.25 * nx ) .AND. i <= INT( 0.75 * nx ) )  THEN
@@ -487,7 +487,7 @@
 !              ENDDO
 !           ENDIF
 !        ENDDO
-! 
+!
 !     ENDIF
 
  END SUBROUTINE user_init_arrays
@@ -500,6 +500,12 @@
 !------------------------------------------------------------------------------!
  SUBROUTINE user_init
 
+   USE grid_variables
+   USE indices
+   USE statistics
+
+   INTEGER(iwp) :: i   !< running index
+   INTEGER(iwp) :: j   !< running index
 
 !    CHARACTER (LEN=20) :: field_char   !<
 !
@@ -508,7 +514,20 @@
 !    ustvst = 0.0_wp
 
 
+
+
+   DO  i = nxlg, nxrg
+      DO  j = nysg, nyng
+         IF ( j > {urban_edge} )  THEN
+            rmask(j,i,1) = 1.0
+         ELSE
+            rmask(j,i,1) = 0.0
+         ENDIF
+      ENDDO
+   ENDDO
+
  END SUBROUTINE user_init
+
 
 
 !------------------------------------------------------------------------------!
@@ -567,8 +586,8 @@
  SUBROUTINE user_header( io )
 
 
-    INTEGER(iwp) ::  i    !< 
-    INTEGER(iwp) ::  io   !< 
+    INTEGER(iwp) ::  i    !<
+    INTEGER(iwp) ::  io   !<
 
 !
 !-- If no user-defined variables are read from the namelist-file, no
@@ -598,7 +617,7 @@
 200 FORMAT (' Output of profiles and time series for following regions:' /)
 201 FORMAT (4X,'Region ',I1,':   ',A)
 
- 
+
  END SUBROUTINE user_header
 
 
@@ -610,7 +629,7 @@
  SUBROUTINE user_actions( location )
 
 
-    CHARACTER (LEN=*) ::  location !< 
+    CHARACTER (LEN=*) ::  location !<
     INTEGER(iwp)      ::  m
 
 !    INTEGER(iwp) ::  i !<
@@ -773,8 +792,8 @@
  SUBROUTINE user_3d_data_averaging( mode, variable )
 
 
-    CHARACTER (LEN=*) ::  mode    !< 
-    CHARACTER (LEN=*) :: variable !< 
+    CHARACTER (LEN=*) ::  mode    !<
+    CHARACTER (LEN=*) :: variable !<
 
 !    INTEGER(iwp) ::  i !<
 !    INTEGER(iwp) ::  j !<
@@ -863,8 +882,8 @@
  SUBROUTINE user_data_output_2d( av, variable, found, grid, local_pf, two_d, nzb_do, nzt_do )
 
 
-    CHARACTER (LEN=*) ::  grid     !< 
-    CHARACTER (LEN=*) ::  variable !< 
+    CHARACTER (LEN=*) ::  grid     !<
+    CHARACTER (LEN=*) ::  variable !<
 
     INTEGER(iwp) ::  av     !< flag to control data output of instantaneous or time-averaged data
 !    INTEGER(iwp) ::  i      !< grid index along x-direction
@@ -874,12 +893,12 @@
     INTEGER(iwp) ::  nzb_do !< lower limit of the domain (usually nzb)
     INTEGER(iwp) ::  nzt_do !< upper limit of the domain (usually nzt+1)
 
-    LOGICAL      ::  found !< 
+    LOGICAL      ::  found !<
     LOGICAL      ::  two_d !< flag parameter that indicates 2D variables (horizontal cross sections)
 
 !    REAL(wp) ::  fill_value = -999.0_wp    !< value for the _FillValue attribute
 
-    REAL(wp), DIMENSION(nxl:nxr,nys:nyn,nzb_do:nzt_do) ::  local_pf !< 
+    REAL(wp), DIMENSION(nxl:nxr,nys:nyn,nzb_do:nzt_do) ::  local_pf !<
 
 !
 !-- Next line is to avoid compiler warning about unused variables. Please remove.
@@ -923,7 +942,7 @@
 !--    In case two-dimensional surface variables are output, the user
 !--    has to access related surface-type. Uncomment and extend following lines
 !--    appropriately (example output of vertical surface momentum flux of u-
-!--    component). Please note, surface elements can be distributed over 
+!--    component). Please note, surface elements can be distributed over
 !--    several data type, depending on their respective surface properties.
 !       CASE ( 'usws_xy' )
 !          IF ( av == 0 )  THEN
@@ -951,7 +970,7 @@
 !          ENDIF
 !
 !          grid = 'zu'
-!--       
+!--
 
 
        CASE DEFAULT
@@ -973,20 +992,20 @@
  SUBROUTINE user_data_output_3d( av, variable, found, local_pf, nzb_do, nzt_do )
 
 
-    CHARACTER (LEN=*) ::  variable !< 
+    CHARACTER (LEN=*) ::  variable !<
 
-    INTEGER(iwp) ::  av    !< 
+    INTEGER(iwp) ::  av    !<
 !    INTEGER(iwp) ::  i     !<
 !    INTEGER(iwp) ::  j     !<
 !    INTEGER(iwp) ::  k     !<
     INTEGER(iwp) ::  nzb_do !< lower limit of the data output (usually 0)
     INTEGER(iwp) ::  nzt_do !< vertical upper limit of the data output (usually nz_do3d)
 
-    LOGICAL      ::  found !< 
+    LOGICAL      ::  found !<
 
 !    REAL(wp) ::  fill_value = -999.0_wp    !< value for the _FillValue attribute
 
-    REAL(sp), DIMENSION(nxl:nxr,nys:nyn,nzb_do:nzt_do) ::  local_pf !< 
+    REAL(sp), DIMENSION(nxl:nxr,nys:nyn,nzb_do:nzt_do) ::  local_pf !<
 
 !
 !-- Next line is to avoid compiler warning about unused variables. Please remove.
@@ -1048,12 +1067,12 @@
  SUBROUTINE user_statistics( mode, sr, tn )
 
 
-    CHARACTER (LEN=*) ::  mode   !< 
+    CHARACTER (LEN=*) ::  mode   !<
 !    INTEGER(iwp) ::  i    !<
 !    INTEGER(iwp) ::  j    !<
 !    INTEGER(iwp) ::  k    !<
-    INTEGER(iwp) ::  sr   !< 
-    INTEGER(iwp) ::  tn   !< 
+    INTEGER(iwp) ::  sr   !<
+    INTEGER(iwp) ::  tn   !<
 
 !    REAL(wp), DIMENSION(:), ALLOCATABLE ::  ts_value_l   !<
 
@@ -1147,7 +1166,7 @@
 !          READ ( 13 )  global_parameter
 
        CASE DEFAULT
- 
+
           found = .FALSE.
 
     END SELECT
@@ -1159,7 +1178,7 @@
 !------------------------------------------------------------------------------!
 ! Description:
 ! ------------
-!> Reading processor specific restart data from file(s) that has been defined 
+!> Reading processor specific restart data from file(s) that has been defined
 !> by the user.
 !> Subdomain index limits on file are given by nxl_on_file, etc.
 !> Indices nxlc, etc. indicate the range of gridpoints to be mapped from the
@@ -1237,7 +1256,7 @@
 !------------------------------------------------------------------------------!
 ! Description:
 ! ------------
-!> Writes processor specific and user-defined restart data into binary file(s) 
+!> Writes processor specific and user-defined restart data into binary file(s)
 !> for restart runs.
 !------------------------------------------------------------------------------!
  SUBROUTINE user_wrd_local

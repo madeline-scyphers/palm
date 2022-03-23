@@ -11,12 +11,12 @@ CANOPY_FILE = (Path(__file__).parent / "homogenous_canopy.nc").resolve()
 # CANOPY_FILE = "homogenous_canopy.nc"
 
 def get_new_lad(old_lad, tree_matrix, **kwargs):
-    
+
     z_height = old_lad.shape[0]
 
     trees = np.tile(tree_matrix, (z_height, 1, 1))
     new_lad = np.multiply(trees, old_lad)
-    
+
     return new_lad
 
 
@@ -41,18 +41,18 @@ def set_ds_attrs_and_coords(ds: xr.Dataset, dx: float, dy: float):
     )
     nx = ds.x.size
     ny = ds.y.size
-    x = np.arange(1, nx*dx, dx, dtype=float)
-    y = np.arange(1, ny*dy, dy, dtype=float)
+    x = np.arange(dx/2, nx*dx, dx, dtype=float)
+    y = np.arange(dx/2, ny*dy, dy, dtype=float)
     ds = ds.assign_attrs(**attrs)
     ds = ds.assign_coords(x=x, y=y)
     return ds
 
-    
+
 
 # def generate_dataaray(values):
 #     da_u = xr.DataArray(
 #         data=values,
-#         dims=["z", "y", "x"], 
+#         dims=["z", "y", "x"],
 #         coords=dict(
 #             z=ds.u.zu_3d.values,
 #             y=ds.u.y.values,
