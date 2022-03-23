@@ -1,26 +1,14 @@
-
 import json
-from dataclasses import dataclass
-import math
 import logging
+import math
+from dataclasses import dataclass
 
 import holoviews as hv
 import numpy as np
 import panel as pn
 import xarray as xr
-
+from parameters import DW, dZ, time_slice, x_slice, y_slice, z_delta_s0_values, z_slice
 from utils import pad_along_axis
-
-from parameters import (
-
-    time_slice,
-    x_slice,
-    y_slice,
-    z_delta_s0_values,
-    z_slice,
-    DW,
-    dZ,
-)
 
 # # %%
 # z_delta_s0_values = np.arange(0, 30).tolist()
@@ -28,10 +16,8 @@ from parameters import (
 # # %%
 # z_lad_values = np.arange(0, 15).tolist()
 
-hv.extension('bokeh')
+hv.extension("bokeh")
 pn.extension(sizing_mode="stretch_width")
-
-
 
 
 @dataclass
@@ -47,10 +33,9 @@ class ConfigTracker:
     # dis_spatiotemporal_mean: float
     sw_count: int
     ej_count: int
-    sweep_perc: float 
+    sweep_perc: float
     delta_s0_bounds_perc: float
-    
-    
+
 
 @dataclass
 class AnalyzeRun:
@@ -59,36 +44,40 @@ class AnalyzeRun:
     run_config: str
     canopy_csv: str
     canopy_height_units: int = 9
-    
+
     @property
     def one_pt_5_canopy_height(self):
-        one_pt_5_canopy_height = int((
-            self.canopy_height_units + 1  # +1 because python indexes from 0
-        ) * 1.5 )
+        one_pt_5_canopy_height = int((self.canopy_height_units + 1) * 1.5)  # +1 because python indexes from 0
         return np.arange(0, one_pt_5_canopy_height)
 
     def substantiate_config_tracker(self):
         with open(self.run_config, "r") as f:
-            cfg= json.load(f)
-        
-        logging.info("analyzing %s with plot size X: %s and Y: %s and tree domain fraction: %s", cfg["job_name"], cfg["plot_size"]["x"], cfg["plot_size"]["y"], cfg["trees"]["domain_fraction"])
-        
+            cfg = json.load(f)
+
+        logging.info(
+            "analyzing %s with plot size X: %s and Y: %s and tree domain fraction: %s",
+            cfg["job_name"],
+            cfg["plot_size"]["x"],
+            cfg["plot_size"]["y"],
+            cfg["trees"]["domain_fraction"],
+        )
+
         self.load_data_sets()
-        
+
         # dis_spatiotemporal_mean = self.get_deposition()
         # logging.info("dis_spatiotemporal_mean %s", dis_spatiotemporal_mean)
 
         DS0 = self.get_delta_s0()
         sw_count, ej_count, sweep_perc = self.calc_sweep_perc(DS0)
-        
+
         logging.info("sweep_perc %s", sweep_perc)
         logging.info("sweep count %s", sw_count)
         logging.info("ejection count %s", ej_count)
-       
+
         delta_s0_bounds_perc = self.calc_DS0_bounds_perc(DS0)
-       
+
         logging.info("delta_s0_bounds_perc %s", delta_s0_bounds_perc)
-       
+
         config_tracker = ConfigTracker(
             job_name=cfg["job_name"],
             domain_x=cfg["domain"]["x"],
@@ -102,7 +91,7 @@ class AnalyzeRun:
             ej_count=ej_count,
             sweep_perc=sweep_perc,
             delta_s0_bounds_perc=delta_s0_bounds_perc,
-            run_time = cfg["output_end_time"] - cfg["output_start_time"]
+            run_time=cfg["output_end_time"] - cfg["output_start_time"],
         )
         self.config_tracker = config_tracker
         return config_tracker
@@ -123,30 +112,35 @@ class AnalyzeRun:
         lad = self.get_lad_values(self.ds_3d.zu_3d.size, self.ds_3d.time.size)
         u_bar = np.sqrt(np.square(self.ds_3d.u.values) + np.square(self.ds_3d.v.values))
 
-        
-        DR = u_bar[:lad.shape[0], :lad.shape[1], :lad.shape[2], :lad.shape[3]] * lad
+        DR = u_bar[: lad.shape[0], : lad.shape[1], : lad.shape[2], : lad.shape[3]] * lad
         DRVsTime = np.nanmean(DR, axis=(x_slice, y_slice))
         tot_deposition = np.nansum(DRVsTime, axis=None) / dZ
 
-        dis_spatiotemporal_mean = (self.canopy_height_units * dZ) * tot_deposition / (self.ds_3d.time.size * self.ds_3d.x.size * self.ds_3d.y.size * (self.canopy_height_units * dZ)) 
+        dis_spatiotemporal_mean = (
+            (self.canopy_height_units * dZ)
+            * tot_deposition
+            / (self.ds_3d.time.size * self.ds_3d.x.size * self.ds_3d.y.size * (self.canopy_height_units * dZ))
+        )
 
         return dis_spatiotemporal_mean
 
-        
     def calc_temp_spac_means(self):
-        TempSpacMeanU = self.ds_3d.u.sum(dim=["xu", "y", "time"]) / (self.ds_3d.x.size * self.ds_3d.y.size * self.ds_3d.time.size)
-        TempSpacMeanV = self.ds_3d.v.sum(dim=["x", "yv", "time"]) / (self.ds_3d.x.size * self.ds_3d.y.size * self.ds_3d.time.size)
+        TempSpacMeanU = self.ds_3d.u.sum(dim=["xu", "y", "time"]) / (
+            self.ds_3d.x.size * self.ds_3d.y.size * self.ds_3d.time.size
+        )
+        TempSpacMeanV = self.ds_3d.v.sum(dim=["x", "yv", "time"]) / (
+            self.ds_3d.x.size * self.ds_3d.y.size * self.ds_3d.time.size
+        )
         return TempSpacMeanU, TempSpacMeanV
 
     def calc_temp_spac_can_means(self):
-        canopy_loc = np.genfromtxt(self.canopy_csv, delimiter=',', dtype="int8")
-        
+        canopy_loc = np.genfromtxt(self.canopy_csv, delimiter=",", dtype="int8")
+
         tiled_canopy = np.tile(canopy_loc, reps=(self.ds_3d.time.size, self.ds_3d.zw_3d.size, 1, 1))
-        
-        u_canopy = (self.ds_3d.u.values * tiled_canopy)
-        v_canopy = (self.ds_3d.v.values * tiled_canopy)
-        w_canopy = (self.ds_3d.w.values * tiled_canopy)
-        
+
+        u_canopy = self.ds_3d.u.values * tiled_canopy
+        v_canopy = self.ds_3d.v.values * tiled_canopy
+        w_canopy = self.ds_3d.w.values * tiled_canopy
 
         # TempSpacCanMeanU = xr.DataArray((np.nansum(u_canopy, (time_slice, x_slice, y_slice))
         #                     / (self.ds_3d.x.size * self.ds_3d.y.size * self.ds_3d.time.size)
@@ -155,15 +149,17 @@ class AnalyzeRun:
         # TempSpacCanMeanV = xr.DataArray((np.nansum(v_canopy, (time_slice, x_slice, y_slice))
         #                     / (self.ds_3d.x.size * self.ds_3d.y.size * self.ds_3d.time.size)
         #                     ), dims=["zu_3d"])
-        
-        TempSpacCanMeanW = xr.DataArray((np.nansum(w_canopy, (time_slice, x_slice, y_slice))
-                        / (self.ds_3d.x.size * self.ds_3d.y.size * self.ds_3d.time.size)
-                        ), dims=["zw_3d"])
+
+        TempSpacCanMeanW = xr.DataArray(
+            (
+                np.nansum(w_canopy, (time_slice, x_slice, y_slice))
+                / (self.ds_3d.x.size * self.ds_3d.y.size * self.ds_3d.time.size)
+            ),
+            dims=["zw_3d"],
+        )
 
         return TempSpacCanMeanW
         # return TempSpacCanMeanU, TempSpacCanMeanV, TempSpacCanMeanW
-
-
 
     def calc_vtr(self, TempSpacMeanU, TempSpacMeanV):
         theta = np.arctan2(TempSpacMeanU[self.canopy_height_units], TempSpacMeanV[self.canopy_height_units])
@@ -175,56 +171,55 @@ class AnalyzeRun:
 
     def calc_mean_temp_and_space_vtr(self, vtr):
         MeanTempvtr = np.squeeze(np.nansum(vtr, time_slice)) / self.ds_3d.time.size
-        MeanTempSpacvtr = MeanTempvtr.mean((x_slice - 1, y_slice - 1))  # time slice removed (slice 0), all slices go down
+        MeanTempSpacvtr = MeanTempvtr.mean(
+            (x_slice - 1, y_slice - 1)
+        )  # time slice removed (slice 0), all slices go down
         return MeanTempvtr, MeanTempSpacvtr
 
     def calc_vp_and_wp(self, vtr, MeanTempSpacvtr, TempSpacCanMeanW):
         vp = vtr - np.expand_dims(MeanTempSpacvtr[self.one_pt_5_canopy_height], axis=(0, 2, 3))
-        wp = (self.ds_3d.w.isel(zw_3d=self.one_pt_5_canopy_height) - TempSpacCanMeanW.isel(zw_3d=self.one_pt_5_canopy_height)).values
+        wp = (
+            self.ds_3d.w.isel(zw_3d=self.one_pt_5_canopy_height)
+            - TempSpacCanMeanW.isel(zw_3d=self.one_pt_5_canopy_height)
+        ).values
 
         return vp, wp
 
     @staticmethod
     def calc_Q2_Q4(vp, wp):
-        Q2 = (vp<0) & (wp>0)
-        Q4 = (vp>0) & (wp<0)
-        
+        Q2 = (vp < 0) & (wp > 0)
+        Q4 = (vp > 0) & (wp < 0)
+
         return Q2, Q4
 
     @staticmethod
     def calc_sweep_and_eject_sum(Q2, Q4):
         SweepSum = np.nansum(Q4, time_slice)
         EjectSum = np.nansum(Q2, time_slice)
-        
-        return SweepSum, EjectSum
 
+        return SweepSum, EjectSum
 
     def calc_all_sweeps_and_ejects(self, vp, wp, Q2, Q4):
         Sweeps = np.zeros(self.ds_3d.w.isel(zw_3d=self.one_pt_5_canopy_height).shape)
         Eject = np.zeros(self.ds_3d.w.isel(zw_3d=self.one_pt_5_canopy_height).shape)
 
         Sweeps[Q4] = vp[Q4] * wp[Q4]
-        Eject[Q2] =  vp[Q2] * wp[Q2]
+        Eject[Q2] = vp[Q2] * wp[Q2]
         Allvw = vp * wp
-        
-        return Sweeps, Eject, Allvw
 
+        return Sweeps, Eject, Allvw
 
     # def sum_over_chunks(arr, chunk_size, axis_to_sum):  # TODO this doesn't change the outcome value at all
     #     axes = len(arr.shape)
     #     reshapers = (arr.shape[axis] for axis in range(axes) if axis != axis_to_sum)
     #     return arr.reshape(-1, chunk_size, *reshapers).sum(1)
-        
-
 
     def calc_delta_s0(self, Sweeps, SweepSum, Eject, EjectSum, Allvw):
-        with np.errstate(divide='ignore', invalid='ignore'):
-            DS0 = (
-                ((np.nansum(Sweeps, time_slice) / SweepSum ) - (np.nansum(Eject, time_slice) / EjectSum))
-                / 
-                (np.nansum(Allvw, axis=time_slice) / self.ds_3d.time.size))
+        with np.errstate(divide="ignore", invalid="ignore"):
+            DS0 = ((np.nansum(Sweeps, time_slice) / SweepSum) - (np.nansum(Eject, time_slice) / EjectSum)) / (
+                np.nansum(Allvw, axis=time_slice) / self.ds_3d.time.size
+            )
         return DS0
-
 
     def get_delta_s0(self):
         TempSpacMeanU, TempSpacMeanV = self.calc_temp_spac_means()
@@ -235,23 +230,24 @@ class AnalyzeRun:
         Q2, Q4 = self.calc_Q2_Q4(vp, wp)
         SweepSum, EjectSum = self.calc_sweep_and_eject_sum(Q2, Q4)
         Sweeps, Eject, Allvw = self.calc_all_sweeps_and_ejects(vp, wp, Q2, Q4)
-        
+
         DS0 = self.calc_delta_s0(Sweeps, SweepSum, Eject, EjectSum, Allvw)
-        
+
         print((DS0[(DS0 >= -1) & (DS0 <= 1)].size) / DS0.size)
-        
+
         return DS0
 
     def calc_sweep_perc(self, DS0):
         sw_count = (DS0[self.one_pt_5_canopy_height, ...] > 0).sum(axis=None)
         ej_count = (DS0[self.one_pt_5_canopy_height, ...] < 0).sum(axis=None)
         n_grid = math.prod(DS0[self.one_pt_5_canopy_height, ...].shape)
-        
+
         return sw_count, ej_count, sw_count / n_grid
 
     @staticmethod
     def calc_DS0_bounds_perc(DS0):
         return (DS0[(DS0 >= -1) & (DS0 <= 1)].size) / DS0.size
+
 
 # ZPlot = 3
 # X1 = 0
@@ -265,11 +261,11 @@ class AnalyzeRun:
 #     z_plot = param.Integer(0, bounds=(min(z_delta_s0_values), max(z_delta_s0_values)))
 #     clim_l = param.Number(-1.0, bounds=(-5.0, 0))
 #     clim_r = param.Number(1.0, bounds=(0, 5.0))
-    
+
 #     def view(self):
 #         delta_s0 = DS0[self.z_plot, :, :]
 #         img = hv.HeatMap((y, x, np.swapaxes(delta_s0, 0, 1))).opts(
-#             hv.opts.HeatMap(tools=['hover'], cmap='bkr', colorbar=True, toolbar='above', 
+#             hv.opts.HeatMap(tools=['hover'], cmap='bkr', colorbar=True, toolbar='above',
 #                                                                 clim=(self.clim_l, self.clim_r)
 #                                                                )
 #         )
@@ -311,8 +307,8 @@ class AnalyzeRun:
 # delta_s0 = DS0[0, :, :]
 
 # fig, ax = plt.subplots(figsize=(width, height))
-# im = ax.imshow(np.swapaxes(delta_s0, 0, 1), 
-#                vmin=-1, vmax=1, 
+# im = ax.imshow(np.swapaxes(delta_s0, 0, 1),
+#                vmin=-1, vmax=1,
 #                interpolation="bilinear")
 
 # # fig.set_size_inches(10, 5.5)     # set a suitable size
@@ -326,5 +322,3 @@ class AnalyzeRun:
 
 # # %%
 # mean_var["MeanVar"].shape
-
-

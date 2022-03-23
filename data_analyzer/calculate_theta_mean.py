@@ -13,6 +13,6 @@ for i, job_path in enumerate(jobs):
     print(job)
     ds = xr.open_dataset(job_path / "OUTPUT" / f"{job}_3d.nc")
     data.append(ds.theta.mean())
-    if i >=5:
+    if i >= 5:
         break
 print(data)
