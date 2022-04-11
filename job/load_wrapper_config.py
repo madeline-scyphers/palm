@@ -50,7 +50,10 @@ def get_wrapper_config(
         "output_end_time": output_end_time,
         "template_path": template_path,
         "domain": {"x": domain_x, "y": domain_y, "dx": dx, "dy": dy, "dz": dz, "urban_ratio": urban_ratio},
-        "house": {"footprint": int(plot_footprint * house_plot_ratio), "height": 2,},  # in square meters
+        "house": {
+            "footprint": int(plot_footprint * house_plot_ratio),
+            "height": 2,
+        },  # in square meters
         "plot": {"plot_footprint": plot_footprint, "plot_ratio": plot_ratio},
         "canopy": {"mean_lai": mean_lai},
     }

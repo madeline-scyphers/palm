@@ -5,6 +5,7 @@ import numpy as np
 
 from __version__ import __version__ as VERSION
 from definitions import JOBS_DIR
+from parser import parser
 
 from .domain import Cell, Domain, House, setup_domain
 from .generate_canopy import get_lad_netcdf
@@ -14,8 +15,6 @@ from .utils import get_factors_rev, make_dirs
 
 
 def init_argparse() -> argparse.ArgumentParser:
-
-    parser = argparse.ArgumentParser(usage="%(prog)s [OPTION] [FILE]...", description="Generate input values for palm")
 
     parser.add_argument("-V", "--version", action="version", version=f"{parser.prog} version {VERSION}")
     parser.add_argument("-n", "--job_name", type=str)
@@ -27,9 +26,9 @@ def init_argparse() -> argparse.ArgumentParser:
     return parser
 
 
-def write_output(domain: Domain, config, job_config, ds):
+def write_output(domain: Domain, config, job_config, ds, job_dir):
 
-    jobs = JOBS_DIR / config["job_name"]
+    jobs = job_dir / config["job_name"]
     input_path = jobs / "INPUT"
     user_code_path = jobs / "USER_CODE"
     wrapper_config_path = jobs / "wrapper_config"
@@ -92,15 +91,18 @@ def validate_domain(domain, config):
 
 
 def get_config(**kwargs):
-    parser = init_argparse()
+    # parser = init_argparse()
 
-    kwargs = parse_args(parser, kwargs)
+    # kwargs = parse_args(parser, kwargs)
 
     config = get_wrapper_config(**kwargs)
     return config
 
 
-def create_input_files(config):
+def create_input_files(
+    config,
+    job_dir=JOBS_DIR,
+):
 
     domain = setup_domain(config)
     validate_domain(domain, config)
@@ -113,14 +115,14 @@ def create_input_files(config):
         dz=config["domain"]["dz"],
         mean_lai=config["canopy"]["mean_lai"],
     )
-    write_output(domain, config, job_config, ds)
+    write_output(domain, config, job_config, ds, job_dir)
 
 
-def main(**kwargs):
+def main(job_dir=JOBS_DIR, **kwargs):
 
     config = get_config(**kwargs)
 
-    create_input_files(config)
+    create_input_files(config, job_dir)
 
     return config
 

@@ -5,6 +5,8 @@ data_analyzer/input
 *static
 *.log
 data/
+output/
+logs/
 
 #################################################
 # Various Python files for different work flows #

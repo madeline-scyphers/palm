@@ -176,7 +176,13 @@ class Domain(BaseDomainArea):
         return string
 
     def get_matrix(self) -> np.ndarray:
-        houses_row = np.tile(self.subplot.matrix, (self.temp_x // self.subplot.x, 1,))
+        houses_row = np.tile(
+            self.subplot.matrix,
+            (
+                self.temp_x // self.subplot.x,
+                1,
+            ),
+        )
         number_of_house_rows = self.trimmed_y // self.subplot.y
         number_of_full_tree_rows = self.temp_y - self.trimmed_y - 1
         mixed_row_ratio = self.temp_y * self.plot_ratio - self.trimmed_y
@@ -231,7 +237,14 @@ def setup_domain(cfg):
         cfg["domain"]["dy"],
     )
     plots = calc_plot_sizes(
-        domain_x, domain_y, plot_footprint, cfg["house"]["footprint"], plot_ratio, dx, dy, cfg["domain"]["y"],
+        domain_x,
+        domain_y,
+        plot_footprint,
+        cfg["house"]["footprint"],
+        plot_ratio,
+        dx,
+        dy,
+        cfg["domain"]["y"],
     )
     tplot_x, tplot_y, tdomain_x, tdomain_y, trimmed_y = get_best_plot_size(plots, plot_footprint, plot_ratio, dx, dy)
     house_x, house_y = calc_house_size(tplot_x, tplot_y, cfg["house"]["footprint"], dx, dy)
