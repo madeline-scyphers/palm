@@ -1,3 +1,0 @@
-,job_name,domain_x,domain_y,plot_x,plot_y,house_domain_fraction,trees_domain_fraction,run_time,dis_spatiotemporal_mean,sweep_perc,delta_s0_bounds_perc
-0,20211205T141223,96,216,8,8,4,8,90,2.958550947029731e-06,0.35664866255144034,0.1536201131687243
-1,20211203T142950,96,216,6,72,4,8,300,1.4126547631412867e-06,0.5977752057613168,0.3851626800411523
