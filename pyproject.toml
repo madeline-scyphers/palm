@@ -7,7 +7,7 @@ skip_glob = ["*env*/*", "current_version/*"]
 
 [tool.black]
 line-length = 120
-experimental-string-processing=true
+preview=true
 # This is a regular expression (hence the \. is escaping the ., and not a literal \.)
 exclude = '''
 (

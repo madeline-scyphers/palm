@@ -1,6 +1,7 @@
 name: palm
 channels:
   - conda-forge
+  - pytorch
   - defaults
 dependencies:
   - python=3.9
@@ -16,3 +17,10 @@ dependencies:
   - jupyter
   - numexpr
   - dask
+  - pytorch
+  - gpytorch
+  - botorch
+  - pip
+  - pip:
+    - ax-platform
+    - git+https://github.com/madeline-scyphers/optiwrap.git

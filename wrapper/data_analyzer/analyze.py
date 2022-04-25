@@ -1,8 +1,9 @@
 from pathlib import Path
-import numpy as np
-import click
 
-from analysis_utils import load_data_set
+import click
+import numpy as np
+
+from .analysis_utils import load_data_set
 
 
 @click.command()

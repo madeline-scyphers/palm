@@ -2,12 +2,10 @@ from pathlib import Path
 
 import numpy as np
 import xarray as xr
+from canopy_generator.generate_canopy import generate_canopy
 from xarray.core.dataset import Dataset
 
-from canopy_generator.generate_canopy import generate_canopy
-
 CANOPY_FILE = (Path(__file__).parent / "homogenous_canopy.nc").resolve()
-
 
 
 def get_lad_netcdf(job_name, tree_matrix, dx, dy, dz, mean_lai, **kwargs):

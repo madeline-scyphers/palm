@@ -9,8 +9,6 @@ from .utils import get_factors_rev
 
 
 def calc_plot_size(domain_x, domain_y, plot_goal, house_goal):
-    if domain_x == 90 and domain_y == 73:
-        print()
     f1 = sorted(get_factors_rev(domain_x))
     f2 = sorted(get_factors_rev(domain_y))
     plot_x, plot_y = None, None
@@ -23,8 +21,6 @@ def calc_plot_size(domain_x, domain_y, plot_goal, house_goal):
                     plot_x, plot_y = x, y
                 elif ((plot_goal - x * y) == (plot_goal - plot_x * plot_y)) and ((x - y) < (plot_x - plot_y)):
                     plot_x, plot_y = x, y
-            if plot_x == 1 or plot_y == 1:
-                print()
     return plot_x, plot_y
 
 
@@ -42,11 +38,8 @@ def calc_plot_sizes(
     plots = []
     for d_x in dom_x:
         for d_y in dom_y:
-            # print(d_y, d_y * 0.7)
             trimmed_d_y = int(d_y * plot_ratio)
             plot_x, plot_y = calc_plot_size(d_x, trimmed_d_y, goal, house_goal)
-            if plot_x == 1 or plot_y == 1:
-                print()
             if plot_x is not None and plot_y is not None:
                 plots.append((plot_x, plot_y, d_x, d_y, trimmed_d_y))
     return plots
