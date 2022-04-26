@@ -23,6 +23,16 @@ del get_config
 del current_dir
 
 
+def _validate_config_constraints(ground_ratio, house_ratio, mean_lai, plot_footprint, **kwargs):
+    assert ground_ratio + house_ratio <= 1
+    assert ground_ratio + house_ratio + .6*house_ratio <= .6
+
+    assert .1 <= house_ratio <= .8  # Ratio of urban area that is house (not ground, not trees)
+    assert .25 <= ground_ratio <= .8  # Ratio of urban area that is ground (not house, not trees)
+    assert 350 <= plot_footprint <= 950  # Size of a plot of land (area of a house and its ground it sits on)
+    assert 2.0 <= mean_lai <= 6.0  # The mean LAI of the canopy. There will be random perturbations to this
+
+
 def get_wrapper_config(
     domain_x=192,
     domain_y=432,
@@ -41,6 +51,7 @@ def get_wrapper_config(
     template_path=TEMPLATE_DIR,
     job_name=None,
 ):
+    _validate_config_constraints(ground_ratio, house_ratio, mean_lai, plot_footprint)
     job_name = job_name if job_name is not None else dt.datetime.now().strftime("%Y%m%dT%H%M%S")
     plot_ratio = ground_ratio + house_ratio
     house_plot_ratio = house_ratio / plot_ratio
