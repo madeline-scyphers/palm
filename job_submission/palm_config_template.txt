@@ -32,7 +32,7 @@
     pt_vertical_gradient       = -0.01,0.094,1.0,  ! piecewise temp gradients
     pt_vertical_gradient_level =  0.0,75.0,400.0,  ! height level of temp gradients
 
-    statistic_regions          =  1
+    statistic_regions          =  2
 
 !
 !-- boundary conditions
@@ -46,7 +46,7 @@
     bc_s_b                     = 'neumann',
 
     passive_scalar             = .T.  !To activate the scalar flux
-    surface_scalarflux         = 1.0, !It should be input even if it is 0.0 for the wall_scalarflux be active
+    surface_scalarflux         = 1000.0, !It should be input even if it is 0.0 for the wall_scalarflux be active
     !wall_scalarflux            = 0.0,0.0,0.0,1.0,0.0, !It is in kg m-1 s-2.
 
 !

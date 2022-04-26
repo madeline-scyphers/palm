@@ -47,7 +47,7 @@ def get_config(**kwargs):
 
 def create_input_files(
     config,
-    job_dir=JOBS_DIR,
+    job_dir,
 ):
 
     domain = setup_domain(config)
@@ -63,7 +63,7 @@ def create_input_files(
     write_output(domain, config, job_config, ds, job_dir)
 
 
-def main(job_dir=JOBS_DIR, **kwargs):
+def main(job_dir, **kwargs):
 
     config = get_config(**kwargs)
 
@@ -73,4 +73,4 @@ def main(job_dir=JOBS_DIR, **kwargs):
 
 
 if __name__ == "__main__":
-    print(main())
+    print(main(JOBS_DIR))

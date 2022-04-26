@@ -1,9 +1,14 @@
+import json
 from pathlib import Path
+import json
+import dask
 
 import click
 import numpy as np
 
 from .analysis_utils import load_data_set
+
+dask.config.set({"array.chunk-size": "512 MiB"})
 
 
 @click.command()
@@ -27,9 +32,13 @@ from .analysis_utils import load_data_set
     help="Name of job.",
 )
 def analye_data(input_dir, output_dir, job_name):
-    job_name = "1"
 
     lad_path = Path(input_dir) / job_name / f"INPUT/{job_name}_static"
+    config_path = Path(input_dir) / job_name / "wrapper_config/wrapper_config.json"
+    with open(config_path, "r") as f:
+        config = json.load(f)
+
+    dz = config["domain"]["dz"]
 
     data_3d_path = sorted(output_dir.glob("*3d*.nc"))[-1]
     data_pr_path = sorted(output_dir.glob("*pr*.nc"))[-1]
@@ -40,25 +49,14 @@ def analye_data(input_dir, output_dir, job_name):
     ds_lad = ds_lad.rename({"zlad": "z"})
     ds_3d = ds_3d.drop_isel(z=[0, 1, -1], x=-1, y=-1)
 
-    ds_pr = ds_pr.rename({"zwv_01": "z"})
-    ds_pr = ds_pr.interp(zwu_01=ds_pr.z)
-
-    dz = 3
-
-    z_scalar = np.arange(150 // dz, 300 // dz)
-
     urban_ratio = 0.5
     y_domain = np.arange(int(ds_3d.s.y.size * urban_ratio), ds_3d.s.y.size)
 
+    z_scalar = np.arange(150 // dz, 300 // dz)
+
     ds_3d = ds_3d.interp(xu=ds_3d.x, yv=ds_3d.y, zw_3d=ds_3d.z)
-
-    ustar = (ds_pr.wu_01**2 + ds_pr.wv_01**2) ** (1 / 4)
-
     tot = ds_3d.uu + ds_3d.vv + ds_3d.ww
-
     ubar = tot ** (1 / 2)
-
-    ustar_bar = ustar.isel(z=0).mean()
 
     DR = ubar.isel(y=y_domain) * ds_3d.s.isel(y=y_domain)
 
@@ -68,16 +66,35 @@ def analye_data(input_dir, output_dir, job_name):
     ubar_z_scalar = ubar.isel(y=y_domain, z=z_scalar).mean(skipna=True)
     scalar_gradient = ds_3d.isel(y=y_domain, z=z_scalar).s.mean(skipna=True)
 
-    r_a = ubar_z_scalar / (ustar_bar**2) + 6.2 / (ustar_bar ** (2 / 3))
-    Depos = DR.mean(skipna=True) * ds_lad.lad.mean(skipna=True)
+    masks = ["01", "02"]
+    r_cas = []
+    for mask in masks:
 
-    r_ca = ustar_bar * lai * (scalar_gradient / Depos - r_a - 1 / (ustar_bar * lai)).compute()
-    print(r_ca.values)
-    file_path = output_dir / f"r_ca.txt"
+        ds_pr = ds_pr.rename({f"zwv_{mask}": f"z_{mask}"})
+        ds_pr = ds_pr.interp({f"zwu_{mask}": ds_pr[f"z_{mask}"]})
+
+        ustar = (ds_pr[f"wu_{mask}"]**2 + ds_pr[f"wv_{mask}"]**2) ** (1 / 4)
+
+        ustar_above_canopy = ustar[f"z_{mask}"] > ds_lad.z.max()
+        first_ustar_above = ustar[f"z_{mask}"][ustar_above_canopy][0]
+        ustar_bar = ustar.sel({f"z_{mask}": first_ustar_above}).mean()
+
+        r_a = ubar_z_scalar / (ustar_bar**2) + 6.2 / (ustar_bar ** (2 / 3))
+        Depos = DR.mean(skipna=True) * ds_lad.lad.mean(skipna=True)
+
+        r_ca = ustar_bar * lai * (scalar_gradient / Depos - r_a - 1 / (ustar_bar * lai)).compute()
+        r_cas.append(r_ca.values)
+    # print(r_ca.values)
+    # data = {"1": r_cas[0], "2": r_cas[2]}
+    data = {i + 1: str(r_ca) for i, r_ca in enumerate(r_cas)}
+    file_path = output_dir / f"r_ca.json"
     with open(file_path, "w") as f:
         print(f"writing out here: {file_path}")
-        f.write(str(r_ca.values))
+        json.dump(data, f)
 
+    # ustar_above_canopy = ustar.z > ds_lad.z.max()
+    # first_ustar_above = ustar.z[ustar_above_canopy][0]
+    # ustar_bar = ustar.sel(z=first_ustar_above).mean()
 
 if __name__ == "__main__":
     analye_data()

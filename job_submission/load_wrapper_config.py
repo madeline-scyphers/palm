@@ -24,8 +24,8 @@ del current_dir
 
 
 def get_wrapper_config(
-    domain_x=int(192),
-    domain_y=int(432),
+    domain_x=192,
+    domain_y=432,
     dx=3,
     dy=3,
     dz=3,
@@ -49,7 +49,7 @@ def get_wrapper_config(
         "output_start_time": output_start_time,
         "output_end_time": output_end_time,
         "template_path": template_path,
-        "domain": {"x": domain_x, "y": domain_y, "dx": dx, "dy": dy, "dz": dz, "urban_ratio": urban_ratio},
+        "domain": {"x": int(domain_x), "y": int(domain_y), "dx": dx, "dy": dy, "dz": dz, "urban_ratio": urban_ratio},
         "house": {
             "footprint": int(plot_footprint * house_plot_ratio),
             "height": 2,

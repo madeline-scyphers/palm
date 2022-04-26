@@ -506,6 +506,8 @@
 
    INTEGER(iwp) :: i   !< running index
    INTEGER(iwp) :: j   !< running index
+   ! INTEGER(kind = 4) :: y
+   INTEGER(iwp) :: y_limit
 
 !    CHARACTER (LEN=20) :: field_char   !<
 !
@@ -518,10 +520,13 @@
 
    DO  i = nxlg, nxrg
       DO  j = nysg, nyng
-         IF ( j > {urban_edge} )  THEN
+         y_limit = (nyng / 2) + (nyng / 40)
+         IF ( j > y_limit )  THEN
             rmask(j,i,1) = 1.0
+            rmask(j,i,2) = 0.0
          ELSE
             rmask(j,i,1) = 0.0
+            rmask(j,i,2) = 1.0
          ENDIF
       ENDDO
    ENDDO
