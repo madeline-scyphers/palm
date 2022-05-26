@@ -200,6 +200,8 @@ class Domain(BaseDomainArea):
         dwty = domain_with_trees.shape[1]
         xs = int(np.floor((self.full_x - dwtx) / 2)), int(np.ceil((self.full_x - dwtx) / 2))
         full_domain = np.pad(domain_with_trees, (xs, (self.full_y - dwty, 0)))
+        mid_x = self.full_x // 2
+        full_domain[mid_x - 2:mid_x + 2, :1] = 940  # Add wall for scalarflux (scalar through topography from one side)
 
         domain = np.where(full_domain != -1, full_domain, 0)
         trees = np.where(full_domain == -1, full_domain, 0)

@@ -30,7 +30,6 @@ log_dir.mkdir(exist_ok=True)
 
 logging.basicConfig(
     filename=log_dir / f'{dt.datetime.now().strftime("%Y%m%dT%H%M%S")}.log',
-    encoding="utf-8",
     level=logging.INFO,
     format="%(asctime)s | %(name)s | %(levelname)s | %(message)s",
 )
