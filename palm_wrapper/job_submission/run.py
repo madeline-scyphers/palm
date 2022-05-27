@@ -5,7 +5,7 @@ import numpy as np
 from definitions import JOBS_DIR
 
 from .domain import Cell, Domain, House, setup_domain
-from .generate_canopy import get_lad_netcdf
+from .generate_canopy import get_xarray_ds
 from .generate_job_config import generate_job_config, generate_user_module
 from .load_wrapper_config import USER_CODE_MODULE, get_wrapper_config
 from .utils import get_factors_rev, make_dirs
@@ -19,8 +19,8 @@ def write_output(domain: Domain, config, job_config, ds, job_dir):
     wrapper_config_path = jobs / "wrapper_config"
     make_dirs([input_path, user_code_path, wrapper_config_path])
 
-    with open(input_path / f"{config['job_name']}_topo", "w") as f:
-        f.write(str(domain))
+    # with open(input_path / f"{config['job_name']}_topo", "w") as f:
+    #     f.write(str(domain))
 
     with open(input_path / f"{config['job_name']}_p3d", "w") as f:
         f.write(job_config)
@@ -41,8 +41,7 @@ def write_output(domain: Domain, config, job_config, ds, job_dir):
 
 
 def get_config(**kwargs):
-    config = get_wrapper_config(**kwargs)
-    return config
+    return get_wrapper_config(**kwargs)
 
 
 def create_input_files(
@@ -52,13 +51,15 @@ def create_input_files(
 
     domain = setup_domain(config)
     job_config = generate_job_config(config)
-    ds = get_lad_netcdf(
+    ds = get_xarray_ds(
         job_name=config["job_name"],
         tree_matrix=domain.trees_matrix,
         dx=config["domain"]["dx"],
         dy=config["domain"]["dy"],
         dz=config["domain"]["dz"],
         mean_lai=config["canopy"]["mean_lai"],
+        stack_height=config["domain"]["stack_height"],
+        topo=domain.matrix
     )
     write_output(domain, config, job_config, ds, job_dir)
 

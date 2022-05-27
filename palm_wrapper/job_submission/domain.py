@@ -151,7 +151,7 @@ class Cell(BaseDomainArea):
 
 
 class Domain(BaseDomainArea):
-    def __init__(self, subplot: Cell, tdomain_x, tdomain_y, full_x, full_y, trimmed_y, plot_ratio) -> None:
+    def __init__(self, subplot: Cell, tdomain_x, tdomain_y, full_x, full_y, trimmed_y, plot_ratio, stack_height) -> None:
         self.subplot = subplot
         self.temp_x = tdomain_x
         self.temp_y = tdomain_y
@@ -159,6 +159,7 @@ class Domain(BaseDomainArea):
         self.full_y = full_y
         self.trimmed_y = trimmed_y
         self.plot_ratio = plot_ratio
+        self.stack_height = stack_height
         # self._validate_matrix_size(subplot=self.subplot)
         self.matrix, self.trees_matrix = self.get_matrix()
 
@@ -201,7 +202,7 @@ class Domain(BaseDomainArea):
         xs = int(np.floor((self.full_x - dwtx) / 2)), int(np.ceil((self.full_x - dwtx) / 2))
         full_domain = np.pad(domain_with_trees, (xs, (self.full_y - dwty, 0)))
         mid_x = self.full_x // 2
-        full_domain[mid_x - 2:mid_x + 2, :1] = 940  # Add wall for scalarflux (scalar through topography from one side)
+        full_domain[mid_x - 2:mid_x + 2, :1] = self.stack_height  # stack for surface scalar to come out of
 
         domain = np.where(full_domain != -1, full_domain, 0)
         trees = np.where(full_domain == -1, full_domain, 0)
@@ -216,11 +217,11 @@ class Domain(BaseDomainArea):
         return cls(subplot=cell, x=x, y=y)
 
     @classmethod
-    def from_plot_size(cls, house, config, tplot_x, tplot_y, tdomain_x, tdomain_y, trimmed_y, plot_ratio):
+    def from_plot_size(cls, house, config, tplot_x, tplot_y, tdomain_x, tdomain_y, trimmed_y, plot_ratio, stack_height):
         cell = Cell(house, x=tplot_x, y=tplot_y)
         # x = config["domain"]["x"]
         # y = config["domain"]["y"]
-        return cls(cell, tdomain_x, tdomain_y, config["domain"]["x"], config["domain"]["y"], trimmed_y, plot_ratio)
+        return cls(cell, tdomain_x, tdomain_y, config["domain"]["x"], config["domain"]["y"], trimmed_y, plot_ratio, stack_height)
 
 
 def setup_domain(cfg):
@@ -246,7 +247,7 @@ def setup_domain(cfg):
 
     house = House(house_x, house_y, cfg["house"]["height"])
 
-    return Domain.from_plot_size(house, cfg, tplot_x, tplot_y, tdomain_x, tdomain_y, trimmed_y, plot_ratio)
+    return Domain.from_plot_size(house, cfg, tplot_x, tplot_y, tdomain_x, tdomain_y, trimmed_y, plot_ratio, cfg["domain"]["stack_height"])
 
 
 if __name__ == "__main__":

@@ -4,12 +4,11 @@ import datetime as dt
 import logging
 import os
 import shutil
-import subprocess
 from pathlib import Path
 from pprint import pformat
 
 import click
-from job_submission import run
+from palm_wrapper.job_submission import run
 # from optiwrap import read_experiment_config
 import yaml
 

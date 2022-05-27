@@ -1,0 +1,3 @@
+This program is the intellectual property of Gil Bohrer and Roni Avissar. It is free for academic use. Do not make any commercial use in this program. Refer to the manuscript by Bohrer et al. 2007 Tellus (located in V-CAGE-original) in any publication that is based on this program or that has used it to. 
+
+Port to python was made with permission of original creators.

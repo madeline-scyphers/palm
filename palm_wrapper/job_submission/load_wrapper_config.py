@@ -34,8 +34,8 @@ def _validate_config_constraints(ground_ratio, house_ratio, mean_lai, plot_footp
 
 
 def get_wrapper_config(
-    domain_x=192,
-    domain_y=432,
+    domain_x=96,  # 192,
+    domain_y=216,  # 432,
     dx=3,
     dy=3,
     dz=3,
@@ -60,10 +60,10 @@ def get_wrapper_config(
         "output_start_time": output_start_time,
         "output_end_time": output_end_time,
         "template_path": template_path,
-        "domain": {"x": int(domain_x), "y": int(domain_y), "dx": dx, "dy": dy, "dz": dz, "urban_ratio": urban_ratio},
+        "domain": {"x": int(domain_x), "y": int(domain_y), "dx": dx, "dy": dy, "dz": dz, "urban_ratio": urban_ratio, "stack_height": 750 / (dz * 3)},
         "house": {
             "footprint": int(plot_footprint * house_plot_ratio),
-            "height": 2,
+            "height": 20 / (dz * 3),
         },  # in square meters
         "plot": {"plot_footprint": plot_footprint, "plot_ratio": plot_ratio},
         "canopy": {"mean_lai": mean_lai},

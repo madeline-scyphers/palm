@@ -1,5 +1,5 @@
 from pathlib import Path
 
-BASE_DIR = Path(__file__).parent.parent.resolve()
+BASE_DIR = Path(__file__).resolve().parent / "scratch"
 
-JOBS_DIR = BASE_DIR / "current_version" / "JOBS"
+JOBS_DIR = BASE_DIR / "JOBS"
