@@ -204,6 +204,8 @@ class Domain(BaseDomainArea):
         mid_x = self.full_x // 2
         full_domain[mid_x - 2:mid_x + 2, :1] = self.stack_height  # stack for surface scalar to come out of
 
+        full_domain = np.flip(full_domain)
+
         domain = np.where(full_domain != -1, full_domain, 0)
         trees = np.where(full_domain == -1, full_domain, 0)
 

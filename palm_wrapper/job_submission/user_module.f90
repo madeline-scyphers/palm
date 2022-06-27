@@ -520,7 +520,7 @@
 
    DO  i = nxlg, nxrg
       DO  j = nysg, nyng
-         y_limit = (nyng / 2) + (nyng / 40)
+         y_limit = (nyng / 2)
          IF ( j > y_limit )  THEN
             rmask(j,i,1) = 1.0
             rmask(j,i,2) = 0.0
@@ -651,7 +651,7 @@
 
        CASE ( 'before_timestep' )
 
-               IF ( simulated_time >= 18000.0_wp ) THEN
+               ! IF ( simulated_time >= 18000.0_wp ) THEN
 
                    DO  m = 1, surf_def_v(0)%ns
 
@@ -659,7 +659,7 @@
 
                    ENDDO
 
-               ENDIF
+               ! ENDIF
 
 !
 !--       Enter actions to be done before every timestep here

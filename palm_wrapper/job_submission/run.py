@@ -1,5 +1,6 @@
 import argparse
 import json
+import logging
 
 import numpy as np
 from definitions import JOBS_DIR
@@ -11,7 +12,12 @@ from .load_wrapper_config import USER_CODE_MODULE, get_wrapper_config
 from .utils import get_factors_rev, make_dirs
 
 
+logger = logging.getLogger(__name__)
+
+
 def write_output(domain: Domain, config, job_config, ds, job_dir):
+
+    logger.info("Writing output to %s", job_dir)
 
     jobs = job_dir / config["job_name"]
     input_path = jobs / "INPUT"
@@ -51,6 +57,8 @@ def create_input_files(
 
     domain = setup_domain(config)
     job_config = generate_job_config(config)
+    print(domain.matrix)
+    print(sum(domain.matrix))
     ds = get_xarray_ds(
         job_name=config["job_name"],
         tree_matrix=domain.trees_matrix,
@@ -74,4 +82,5 @@ def main(job_dir, **kwargs):
 
 
 if __name__ == "__main__":
+    logging.basicConfig(level=logging.DEBUG, force=True)
     print(main(JOBS_DIR))

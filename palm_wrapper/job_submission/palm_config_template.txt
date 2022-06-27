@@ -46,7 +46,7 @@
     bc_s_b                     = 'neumann',
 
     passive_scalar             = .T.  !To activate the scalar flux
-    !surface_scalarflux         = 0.0, !It should be input even if it is 0.0 for the wall_scalarflux be active
+    surface_scalarflux         = 0.0, !It should be input even if it is 0.0 for the wall_scalarflux be active
     !wall_scalarflux            = 0.0,0.0,0.0,0.0,1.0 !It is in kg m-1 s-2.
 
 !
@@ -80,7 +80,7 @@
 !
 !-- data output
 !-------------------------------------------------------------------------------
-    netcdf_data_format         = 2, ! use NetCDF3 64 bit offset
+    netcdf_data_format         = 3, ! use NetCDF3 64 bit offset
                                     ! Options:
                                     ! 1 	netCDF classic format (filesize limited to 2GB)
                                     ! 2 	netCDF 64-bit-offset format (large file support, but single variable still limited to 2GB)

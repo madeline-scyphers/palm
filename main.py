@@ -102,6 +102,7 @@ def main(job_name, config_file, input_dir=None):
     wrapper_config = run_job(job_name, ex_settings=config["optimization_options"], input_dir=input_dir, **model_options, **params)
 
     logging.info("\nWrapper Config: \n%s", pformat(wrapper_config))
+    logging.info("written to directory: %s", input_dir)
 
     logging.info("\nscript done")
 

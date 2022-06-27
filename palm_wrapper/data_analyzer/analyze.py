@@ -1,5 +1,6 @@
 import json
 from pathlib import Path
+from pprint import pprint
 import json
 import dask
 
@@ -66,7 +67,7 @@ def analye_data(input_dir, output_dir, job_name):
     ubar_z_scalar = ubar.isel(y=y_domain, z=z_scalar).mean(skipna=True)
     scalar_gradient = ds_3d.isel(y=y_domain, z=z_scalar).s.mean(skipna=True)
 
-    masks = ["01", "02"]
+    masks = ["00", "01", "02"]
     r_cas = []
     for mask in masks:
 
@@ -84,12 +85,14 @@ def analye_data(input_dir, output_dir, job_name):
 
         r_ca = ustar_bar * lai * (scalar_gradient / Depos - r_a - 1 / (ustar_bar * lai)).compute()
         r_cas.append(r_ca.values)
+        print(f"r_ca value for mask {mask} = {r_ca.values}")
     # print(r_ca.values)
     # data = {"1": r_cas[0], "2": r_cas[2]}
     data = {i + 1: str(r_ca) for i, r_ca in enumerate(r_cas)}
     file_path = output_dir / f"r_ca.json"
     with open(file_path, "w") as f:
         print(f"writing out here: {file_path}")
+        pprint(data)
         json.dump(data, f)
 
     # ustar_above_canopy = ustar.z > ds_lad.z.max()
