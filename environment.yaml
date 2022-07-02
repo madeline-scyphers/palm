@@ -9,13 +9,15 @@ dependencies:
   - pandas
   - scipy
   - xarray
+  - dask
+  - netCDF4
+  - bottleneck
   - pytest
   - black
   - isort
   - jupyterlab
   - jupyter
   - numexpr
-  - dask
   - pip
   - pip:
     - torch
