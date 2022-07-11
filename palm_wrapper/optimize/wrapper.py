@@ -22,10 +22,11 @@ import datetime as dt
 
 import subprocess
 import os
+from pathlib import Path
 
 from ax import Trial
 
-from optiwrap import (
+from boa import (
     BaseWrapper,
     get_trial_dir,
     make_trial_dir,
@@ -33,71 +34,57 @@ from optiwrap import (
 )
 
 from palm_wrapper.job_submission.run import create_input_files, get_config
+from palm_wrapper.data_analyzer.analyze import analye_data
 
 
 class Wrapper(BaseWrapper):
-    _processes = []
     def __init__(self, ex_settings, model_settings, experiment_dir):
         self.ex_settings = ex_settings
         self.model_settings = model_settings
         self.experiment_dir = experiment_dir
 
     def write_configs(self, trial: Trial) -> None:
+        job_dir = self.model_settings["job_dir"]
         config = get_config()
-        pass
+        create_input_files(config, job_dir)
 
     def run_model(self, trial: Trial):
+        model_dir = self.model_settings["model_dir"]
+        job_name = self.model_settings["job_name"]
+        run_time = self.model_settings["run_time"]
 
-        trial_dir = make_trial_dir(self.experiment_dir, trial.index)
-
-        config_dir = write_configs(trial_dir, trial.arm.parameters, self.model_settings)
-
-        model_dir = self.ex_settings["model_dir"]
-
-        # with cd_and_cd_back(model_dir):
         os.chdir(model_dir)
 
-        cmd = (f"python main.py --config_path {config_dir} --data_path"
-               f" {self.ex_settings['data_path']} --output_path {trial_dir}")
+        # cmd = (f"bash start_palm.sh {job_name} {run_time}")
+        cmd = (f"bash start_palm.sh {job_name} {run_time}")
+        # cmd = (f"palm_run -a -b {job_name} {run_time}")
 
         args = cmd.split()
-        popen = subprocess.Popen(
+        subprocess.Popen(
             args, stdout=subprocess.PIPE, universal_newlines=True
         )
-        self._processes.append(popen)
 
     def set_trial_status(self, trial: Trial) -> None:
-        """ "Get status of the job by a given ID. For simplicity of the example,
+        """Get status of the job by a given ID. For simplicity of the example,
         return an Ax `TrialStatus`.
         """
-        log_file = get_trial_dir(self.experiment_dir, trial.index) / "fetch3.log"
+        model_dir = self.model_settings["model_dir"]
+        job_name = self.model_settings["job_name"]
+
+        log_file = Path(model_dir) / job_name / "Logs" / f"{job_name}.log"
 
         if log_file.exists():
             with open(log_file, "r") as f:
                 contents = f.read()
-            if "Error completing Run! Reason:" in contents:
+            if "Run Failed" in contents:
                 trial.mark_failed()
-            elif "run complete" in contents:
+            elif "all OUTPUT-files saved" in contents:
                 trial.mark_completed()
 
     def fetch_trial_data(self, trial: Trial, *args, **kwargs):
+        model_dir = self.model_settings["model_dir"]
+        job_name = self.model_settings["job_name"]
 
-        modelfile = (
-            get_trial_dir(self.experiment_dir, trial.index) / self.ex_settings["output_fname"]
-        )
+        modelfile = model_dir / job_name / "OUTPUT" / f"{job_name}_3d.nc"
 
-        y_pred, y_true = get_model_obs(
-            modelfile,
-            self.ex_settings["obsfile"],
-            self.ex_settings,
-            self.model_settings,
-            trial.arm.parameters,
-        )
-        return dict(y_pred=y_pred, y_true=y_true)
-
-
-def exit_handler():
-    for process in Fetch3Wrapper._processes:
-        process.kill()
-
-atexit.register(exit_handler)
+        return analye_data(modelfile)

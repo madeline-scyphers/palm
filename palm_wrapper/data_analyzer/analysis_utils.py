@@ -16,3 +16,10 @@ def calc_temp_spac_means(ds):
     TempSpacMeanV = ds.v.sum(dim=["x", "yv", "time"]) / (ds.x.size * ds.y.size * ds.time.size)
     TempSpacMeanW = ds.w.sum(dim=["x", "y", "time"]) / (ds.x.size * ds.y.size * ds.time.size)
     return TempSpacMeanU, TempSpacMeanV, TempSpacMeanW
+
+
+def calc_temp_spac_means_interp(ds):
+    TempSpacMeanU = ds.u.sum(dim=["x", "y", "time"]) / (ds.x.size * ds.y.size * ds.time.size)
+    TempSpacMeanV = ds.v.sum(dim=["x", "y", "time"]) / (ds.x.size * ds.y.size * ds.time.size)
+    TempSpacMeanW = ds.w.sum(dim=["x", "y", "time"]) / (ds.x.size * ds.y.size * ds.time.size)
+    return TempSpacMeanU, TempSpacMeanV, TempSpacMeanW

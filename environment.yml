@@ -24,4 +24,4 @@ dependencies:
     - torchaudio
     - torchvision
     - ax-platform
-    - git+https://github.com/madeline-scyphers/optiwrap.git
+    - git+https://github.com/madeline-scyphers/boa.git
