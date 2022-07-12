@@ -9,7 +9,7 @@ current_dir = Path(__file__).resolve().parent
 USER_CODE_MODULE = current_dir / "user_module.f90"
 
 
-def generate_job_config(config: dict) -> dict:
+def generate_job_config(config: dict) -> str:
     with open(config["template_path"]) as template:
         job_config = template.read()
     job_cfg = job_config.format(

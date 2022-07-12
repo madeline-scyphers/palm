@@ -32,7 +32,7 @@ dask.config.set({"array.chunk-size": "512 MiB"})
     type=str,
     help="Name of job.",
 )
-def analye_data(input_dir, output_dir, job_name):
+def analyze_data(input_dir, output_dir, job_name):
 
     lad_path = Path(input_dir) / job_name / f"INPUT/{job_name}_static"
     config_path = Path(input_dir) / job_name / "wrapper_config/wrapper_config.json"
@@ -99,5 +99,6 @@ def analye_data(input_dir, output_dir, job_name):
     # first_ustar_above = ustar.z[ustar_above_canopy][0]
     # ustar_bar = ustar.sel(z=first_ustar_above).mean()
 
+
 if __name__ == "__main__":
-    analye_data()
+    analyze_data()

@@ -53,5 +53,13 @@ parameter_constraints:
     - ground_ratio + house_ratio <= 1
     - ground_ratio + house_ratio + .6*house_ratio <= .6
 
-#model_options:
-
+model_options:
+    output_start_time: 0
+    output_end_time: 300
+    palmrun_walltime_scalar: 3
+    data_analyse_walltime_scalar: .3
+    io_config: '"slurm"'
+    optimization_output_dir: "~/palm/output"
+    working_dir: $TMPDIR
+    palm_wrapper_pkg_path:  ~/palm/palm_wrapper
+    model_path: ~/palm/current_version

@@ -1,0 +1,46 @@
+#!/bin/bash
+#SBATCH --job-name={job_name}
+#SBATCH --time={batch_time}
+#SBATCH --nodes=2 --ntasks-per-node=24
+#SBATCH --partition=parallel
+#SBATCH --output={log_file}
+#SBATCH --account=PAS0409
+
+set -x  # for displaying the commands in the log for debugging
+
+config_path={config_path}
+job_name={job_name}
+run_time={run_time}
+working_dir={working_dir}
+working_dir_output=$working_dir/{job_name}/OUTPUT
+job_output_dir={job_output_dir}
+palm_wrapper_pkg_path={palm_wrapper_pkg_path}
+config_writer_path=$palm_wrapper_pkg_path/main.py
+data_analyzer_path=$palm_wrapper_pkg_path/analyze_rca.py
+model_path={model_path}
+io_config={io_config}
+
+
+mkdir -p $working_dir
+mkdir -p $working_dir_output
+
+python $script_path --config_file $config_path --input_dir $working_dir --job_name $job_name
+
+cd $model_path
+
+palmrun -r $job_name -c default -X48 -T24 -q parallel -t $run_time -a ${io_config} -v -m 4315
+
+python -m $data_analyzer_path --input_dir $working_dir --output_dir $working_dir_output
+
+function move_output() {
+#    cd $SLURM_SUBMIT_DIR
+    job_output=$job_output_dir/output
+    mkdir -p $job_output
+    cp -R $working_dir_output/r_ca.json $job_output/r_ca.json
+    # cp -R $working_dir_output $job_output_dir/output
+    cp -R $working_dir $job_output_dir
+  exit
+}
+
+move_output
+trap move_output TERM
