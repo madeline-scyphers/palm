@@ -22,11 +22,6 @@ optimization_options:
               num_trials: 10
             - model: GPKG
               num_trials: -1
-    # experiment options we wish to use
-    # we specify an experiment name, which we can
-    # also use to name our experiment running and output directory
-    experiment:
-        name: "palm_stuff"
     # Scheduler options we wish to use
     # Here we specify a total of 10 trials will be ran.
     scheduler:
