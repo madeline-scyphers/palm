@@ -106,6 +106,7 @@ def main(job_name, config_file, input_dir=None):
 
     logging.info("\nscript done")
 
+
 def run_job(job_name, ex_settings, input_dir, **kwargs):
     working_dir = Path(ex_settings.get("working_dir", "~/palm"))
     wrapper_config = {}
@@ -115,8 +116,8 @@ def run_job(job_name, ex_settings, input_dir, **kwargs):
         wrapper_config = run.get_config(
             output_start_time=OUTPUT_START_TIME, output_end_time=OUTPUT_END_TIME, job_name=job_name, **kwargs
         )
+        run.create_input_files(wrapper_config, input_dir)
 
-        _run_job(wrapper_config, input_dir, ex_settings)
     except TypeError as e:
         logging.exception(e)
 
@@ -125,38 +126,6 @@ def run_job(job_name, ex_settings, input_dir, **kwargs):
             shutil.rmtree(input_dir_to_remove)
 
     return wrapper_config
-
-
-def _run_job(wrapper_config: dict, input_dir: Path, ex_settings: dict):
-    run.create_input_files(wrapper_config, input_dir)
-
-    # if not ex_settings.get("dry_run", False):
-    #     logging.info("Starting new job %s", wrapper_config["job_name"])
-
-    #     os.chdir(input_dir.parent)
-
-    #     run_time = JOB_RUN_TIMEOUT_SCALER * wrapper_config["output_end_time"]
-
-    #     io_config = ex_settings.get("io_config", "d3#")
-    #     to_batch = "-b" if io_config == "d3#" else ""
-
-    #     cmd = f'bash start_palm.sh {wrapper_config["job_name"]} {run_time} {to_batch} {io_config}'
-    #     args = cmd.split()
-
-    #     result = subprocess.run(
-    #         args,
-    #         stdin=subprocess.PIPE,
-    #         stdout=subprocess.PIPE,
-    #         stderr=subprocess.PIPE,
-    #     )
-
-    #     logging.info("stdout: \n%s", str(result.stdout))
-
-    #     logging.info(summary)
-
-    # else:
-    #     logging.info("Dry run. Only created configuration")
-
 
 
 if __name__ == "__main__":
