@@ -141,7 +141,6 @@ class Wrapper(BaseWrapper):
         # TODO add sphinx link to ax trial status
 
         """
-        """
         trial_config = self._load_trial_config(trial)
 
         log_file = trial_config["model_options"]["log_file"]
@@ -156,7 +155,31 @@ class Wrapper(BaseWrapper):
             if "all OUTPUT-files saved" in contents:
                 trial.mark_completed()
 
-    def fetch_trial_data(self, trial: Trial, *args, **kwargs):
+    def fetch_trial_data(self, trial: Trial, metric_properties: dict, metric_name: str,  *args, **kwargs):
+        """
+        Retrieves the trial data and prepares it for the metric(s) used in the objective
+        function.
+
+        For example, for a case where you are minimizing the error between a model and observations, using RMSE as a
+        metric, this function would load the model output and the corresponding observation data that will be passed to
+        the RMSE metric.
+
+        The return value of this function is a dictionary, with keys that match the keys
+        of the metric used in the objective function.
+        # TODO work on this description
+
+        Parameters
+        ----------
+        trial : Trial
+        metric_properties: dict
+        metric_name: str
+
+        Returns
+        -------
+        dict
+            A dictionary with the keys matching the keys of the metric function
+                used in the objective
+        """
         trial_config = trial.run_metadata["trial_config_path"]
         job_output_dir = trial_config["model_options"]["job_output_dir"]
         data_filepath = job_output_dir / "r_ca.json"
