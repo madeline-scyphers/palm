@@ -32,6 +32,18 @@ class Wrapper(BaseWrapper):
         self.experiment_dir = None
 
     def load_config(self, config_file: os.PathLike):
+        """
+        Load config file and return a dictionary # TODO finish this
+
+        Parameters
+        ----------
+        config_file : os.PathLike
+            File path for the experiment configuration file
+
+        Returns
+        -------
+        loaded_config: dict
+        """
         config = load_yaml(config_file)
         experiment_name = get_dt_now_as_str()
         config["optimization_options"]["experiment"]["name"] = experiment_name
@@ -42,27 +54,20 @@ class Wrapper(BaseWrapper):
         self.experiment_dir = Path(self.model_settings["optimization_output_dir"]).expanduser() / experiment_name
 
     def write_configs(self, trial: Trial) -> None:
+        """
+        This function is usually used to write out the configurations files used
+        in an individual optimization trial run, or to dynamically write a run
+        script to start an optimization trial run.
+
+        Parameters
+        ----------
+        trial : BaseTrial
+        """
         trial_config = copy.deepcopy(self.config)
         job_name = zfilled_trial_index(trial.index)
         job_output_dir = self.experiment_dir / job_name
         job_output_dir.mkdir(parents=True)
-        job_script_path, trial_config_path = self._update_trial_config(trial_config, trial, job_name, job_output_dir)
-        trial.update_run_metadata(
-            dict(trial_config_path=trial_config_path,
-                 job_script_path=job_script_path))
 
-        with open(JOB_SCRIPT_PATH) as template:
-            job_script = template.read()
-        job_script.format(**trial_config["model_options"])
-
-        with open(job_script_path, "w") as f:
-            f.write(job_script)
-
-        with open(trial_config_path, 'w') as f:
-            yaml.dump(trial_config, f)
-
-    @staticmethod
-    def _update_trial_config(trial_config, trial, job_name, job_output_dir):
         run_time = trial_config["model_options"]["output_end_time"] * trial_config["model_options"][
             "palmrun_walltime_scalar"]
         data_analyses_time = (
@@ -81,9 +86,29 @@ class Wrapper(BaseWrapper):
         trial_config["model_options"]["run_time"] = run_time
         trial_config["model_options"]["data_analyses_time"] = data_analyses_time
         trial_config["model_options"]["batch_time"] = run_time + data_analyses_time
-        return job_script_path, trial_config_path
+
+        trial.update_run_metadata(
+            dict(trial_config_path=trial_config_path,
+                 job_script_path=job_script_path))
+
+        with open(JOB_SCRIPT_PATH) as template:
+            job_script = template.read()
+        job_script.format(**trial_config["model_options"])
+
+        with open(job_script_path, "w") as f:
+            f.write(job_script)
+
+        with open(trial_config_path, 'w') as f:
+            yaml.dump(trial_config, f)
 
     def run_model(self, trial: Trial):
+        """
+        Runs a model by deploying a given trial.
+
+        Parameters
+        ----------
+        trial : BaseTrial
+        """
         trial_config = self._load_trial_config(trial)
 
         job_script_path = trial_config["model_options"]["job_script_path"]
@@ -95,8 +120,27 @@ class Wrapper(BaseWrapper):
         )
 
     def set_trial_status(self, trial: Trial) -> None:
-        """Get status of the job by a given ID. For simplicity of the example,
-        return an Ax `TrialStatus`.
+        """
+        The trial gets polled from time to time to see if it is completed, failed, still running,
+        etc. This marks the trial as one of those options based on some criteria of the model.
+        If the model is still running, don't do anything with the trial.
+
+        Parameters
+        ----------
+        trial : BaseTrial
+
+        Examples
+        --------
+        trial.mark_completed()
+        trial.mark_failed()
+        trial.mark_abandoned()
+        trial.mark_early_stopped()
+
+        See Also
+        --------
+        # TODO add sphinx link to ax trial status
+
+        """
         """
         trial_config = self._load_trial_config(trial)
 

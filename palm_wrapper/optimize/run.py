@@ -1,18 +1,15 @@
 """
 FETCH3 optimization
 -------------------
-Runs optimization for FETCH3.
-Options for the optimization are set in the .yml file.
-This script is meant to be run from the command line, and the optimization configuration .yml
+Runs optimization for wrapper for PALM
+Options for the optimization are set in the .yaml file.
+This script is meant to be run from the command line, and the optimization configuration .yaml
 file is specified as a command line argument, for example::
-      python run_optimization.py --config_path /Users/jmissik/Desktop/repos/fetch3_nhl/optimize/umbs_optimization_config.yml
-See optimization_config_template.yml for an example configuration file.
-See ``optimization_results.ipynb`` for an example of how to explore the optimization results.
+      python run_optimization.py --config_path /path/to/config/file.yaml
 """
 
 import datetime as dt
 import logging
-import shutil
 import time
 from pathlib import Path
 
@@ -22,9 +19,7 @@ from boa import (
     WrappedJobRunner,
     get_experiment,
     get_scheduler,
-    make_experiment_dir,
     scheduler_to_json_file,
-    normalize_config
 )
 
 from palm_wrapper.optimize.wrapper import Wrapper
