@@ -1,5 +1,5 @@
 """
-FETCH3 optimization
+palm_wrapper optimization
 -------------------
 Runs optimization for wrapper for PALM
 Options for the optimization are set in the .yaml file.
