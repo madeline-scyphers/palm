@@ -25,3 +25,4 @@ dependencies:
     - torchvision
     - ax-platform
     - git+https://github.com/madeline-scyphers/boa.git
+    - Jinja2

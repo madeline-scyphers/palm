@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import datetime as dt
+from locale import normalize
 import logging
 import os
 import shutil
@@ -11,6 +12,7 @@ import click
 from palm_wrapper.job_submission import run
 # from optiwrap import read_experiment_config
 import yaml
+from boa import load_yaml
 
 ONE_MIN = 60
 TEN_MIN = 10 * ONE_MIN
@@ -95,11 +97,12 @@ def read_experiment_config(config_file):
     help="Path to input directory",
 )
 def main(job_name, config_file, input_dir=None):
-    config = read_experiment_config(config_file)
+    config = load_yaml(config_file, normalize=False)
     model_options = config.get("model_options", {})
+    model_options["job_name"] == job_name
     params = config.get("parameters", {})
     input_dir = input_dir if input_dir is not None else Path(config["optimization_options"].get("input_dir", ""))
-    wrapper_config = run_job(job_name, ex_settings=config["optimization_options"], input_dir=input_dir, **model_options, **params)
+    wrapper_config = run_job(ex_settings=config["optimization_options"], input_dir=input_dir, **model_options, **params)
 
     logging.info("\nWrapper Config: \n%s", pformat(wrapper_config))
     logging.info("written to directory: %s", input_dir)
@@ -114,7 +117,7 @@ def run_job(job_name, ex_settings, input_dir, **kwargs):
         os.chdir(working_dir.expanduser())
 
         wrapper_config = run.get_config(
-            output_start_time=OUTPUT_START_TIME, output_end_time=OUTPUT_END_TIME, job_name=job_name, **kwargs
+            job_name=job_name, **kwargs
         )
         run.create_input_files(wrapper_config, input_dir)
 

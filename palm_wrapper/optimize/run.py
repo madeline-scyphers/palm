@@ -12,7 +12,7 @@ import datetime as dt
 import logging
 import time
 from pathlib import Path
-
+from pprint import pprint
 
 import click
 from boa import (
@@ -55,13 +55,18 @@ def main(config_path):
     logger.info("Start time: %s", dt.datetime.now().strftime("%Y%m%dT%H%M%S"))
 
     experiment = get_experiment(config, WrappedJobRunner(wrapper=wrapper), wrapper)
+    pprint(experiment.search_space.parameter_constraints)
+
     scheduler = get_scheduler(experiment, config=config)
 
     try:
         scheduler.run_all_trials()
+    except Exception as e:
+        logging.exception((repr(e)))
+        raise
     finally:
         logging.info("\nTrials completed! Total run time: %d", time.time() - start)
-        scheduler_to_json_file(scheduler, wrapper.experiment_dir / "scheduler.json")
+        # scheduler_to_json_file(scheduler, wrapper.experiment_dir / "scheduler.json")
     return scheduler
 
 

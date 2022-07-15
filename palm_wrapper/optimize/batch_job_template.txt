@@ -1,36 +1,42 @@
 #!/bin/bash
-#SBATCH --job-name={job_name}
-#SBATCH --time={batch_time}
-#SBATCH --nodes=2 --ntasks-per-node=24
-#SBATCH --partition=parallel
-#SBATCH --output={log_file}
+#SBATCH --job-name={{ job_name }}
+#SBATCH --time={{ batch_time }}
+#SBATCH --nodes={{ nodes }} --ntasks-per-node={{ ntasks_per_node }}
+#SBATCH --output={{ log_file }}
 #SBATCH --account=PAS0409
 
 set -x  # for displaying the commands in the log for debugging
 
-config_path={config_path}
-job_name={job_name}
-run_time={run_time}
-working_dir={working_dir}
-working_dir_output=$working_dir/{job_name}/OUTPUT
-job_output_dir={job_output_dir}
-palm_wrapper_pkg_path={palm_wrapper_pkg_path}
-config_writer_path=$palm_wrapper_pkg_path/main.py
-data_analyzer_path=$palm_wrapper_pkg_path/analyze_rca.py
-model_path={model_path}
-io_config={io_config}
+config_path={{ config_path }}
+job_name={{ job_name }}
+run_time={{ run_time }}
+working_dir={{ working_dir }}
+working_dir_output=$working_dir/{{ job_name }}/OUTPUT
+job_output_dir={{ job_output_dir }}
+palm_wrapper_pkg_path={{ palm_wrapper_pkg_path }}
+config_writer_path=~/palm/palm_wrapper/main.py
+data_analyzer_path=~/palm/palm_wrapper/analyze_rca.py
+model_path={{ model_path }}
+io_config={{ io_config }}
 
+current_dir=`pwd`
 
 mkdir -p $working_dir
 mkdir -p $working_dir_output
 
-python $script_path --config_file $config_path --input_dir $working_dir --job_name $job_name
+python $config_writer_path --config_file $config_path --input_dir $working_dir --job_name $job_name
+
+ls $working_dir
+ls $working_dir/$job_name
+
 
 cd $model_path
 
-palmrun -r $job_name -c default -X48 -T24 -q parallel -t $run_time -a ${io_config} -v -m 4315
+palmrun -r $job_name -c default -X{{ nodes * ntasks_per_node }} -T{{ ntasks_per_node }} -q parallel -t $run_time -a ${io_config} -v -m 4315
 
-python -m $data_analyzer_path --input_dir $working_dir --output_dir $working_dir_output
+cd $current_dir
+
+python data_analyzer_path --input_dir $working_dir --output_dir $working_dir_output
 
 function move_output() {
 #    cd $SLURM_SUBMIT_DIR

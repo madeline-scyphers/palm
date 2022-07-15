@@ -24,13 +24,13 @@ del current_dir
 
 
 def _validate_config_constraints(ground_ratio, house_ratio, mean_lai, plot_footprint, **kwargs):
-    assert ground_ratio + house_ratio <= 1
-    assert ground_ratio + house_ratio + .6*house_ratio <= .6
+    assert ground_ratio + house_ratio <= 1, f"{ground_ratio=}, {house_ratio=}, {mean_lai=}, {plot_footprint=}"
+    assert ground_ratio + house_ratio + .6*house_ratio <= .6, f"{ground_ratio=}, {house_ratio=}, {mean_lai=}, {plot_footprint=}"
 
-    assert .1 <= house_ratio <= .8  # Ratio of urban area that is house (not ground, not trees)
-    assert .25 <= ground_ratio <= .8  # Ratio of urban area that is ground (not house, not trees)
-    assert 350 <= plot_footprint <= 950  # Size of a plot of land (area of a house and its ground it sits on)
-    assert 2.0 <= mean_lai <= 6.0  # The mean LAI of the canopy. There will be random perturbations to this
+    assert .1 <= house_ratio <= .8, f"{ground_ratio=}, {house_ratio=}, {mean_lai=}, {plot_footprint=}"  # Ratio of urban area that is house (not ground, not trees)
+    assert .25 <= ground_ratio <= .8, f"{ground_ratio=}, {house_ratio=}, {mean_lai=}, {plot_footprint=}"  # Ratio of urban area that is ground (not house, not trees)
+    assert 350 <= plot_footprint <= 950, f"{ground_ratio=}, {house_ratio=}, {mean_lai=}, {plot_footprint=}"  # Size of a plot of land (area of a house and its ground it sits on)
+    assert 2.0 <= mean_lai <= 6.0, f"{ground_ratio=}, {house_ratio=}, {mean_lai=}, {plot_footprint=}"  # The mean LAI of the canopy. There will be random perturbations to this
 
 
 def get_wrapper_config(
@@ -54,6 +54,7 @@ def get_wrapper_config(
     output_end_time=300,
     template_path=TEMPLATE_DIR,
     job_name=None,
+    **kwargs
 ):
     _validate_config_constraints(ground_ratio, house_ratio, mean_lai, plot_footprint)
     job_name = job_name if job_name is not None else dt.datetime.now().strftime("%Y%m%dT%H%M%S")
