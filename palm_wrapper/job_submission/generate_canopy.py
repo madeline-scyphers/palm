@@ -9,9 +9,8 @@ CANOPY_FILE = (Path(__file__).parent / "homogenous_canopy.nc").resolve()
 
 def get_xarray_ds(job_name, tree_matrix, dx, dy, dz, mean_lai, stack_height, topo, **kwargs):
     trees = tree_matrix * -1
-    zlad = [0, *range(1, 15, dz)]
     new_lad_ds = generate_canopy(
-        trees.T, zlad=zlad, dz=dz, mean_lai=mean_lai
+        trees.T, dz=dz, mean_lai=mean_lai, h=20,
     )  #  todo cleanup the having to traspose things
     ds = new_lad_ds.drop(labels=["lai", "height", "patch", "flux", "DBHc"])
     ds = set_ds_attrs_and_coords(ds, dx, dy)
