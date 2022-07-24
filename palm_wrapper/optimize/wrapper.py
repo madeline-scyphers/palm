@@ -214,7 +214,7 @@ class Wrapper(BaseWrapper):
 
         with open(data_filepath, 'r') as f:
             data = json.load(f)
-        r_ca = np.array(data["1"])
+        r_ca = np.array(data["r_ca"])
         return dict(a=r_ca)
 
     @staticmethod

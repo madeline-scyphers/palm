@@ -11,7 +11,7 @@ config_path={{ config_path }}
 job_name={{ job_name }}
 run_time={{ run_time }}
 working_dir={{ working_dir }}
-working_dir_output=$working_dir/{{ job_name }}/OUTPUT
+working_dir_output=$working_dir/$job_name/OUTPUT
 job_output_dir={{ job_output_dir }}
 palm_wrapper_pkg_path={{ palm_wrapper_pkg_path }}
 config_writer_path=~/palm/palm_wrapper/main.py
@@ -36,7 +36,7 @@ palmrun -r $job_name -c default -X{{ nodes * ntasks_per_node }} -T{{ ntasks_per_
 
 cd $current_dir
 
-python data_analyzer_path --input_dir $working_dir --output_dir $working_dir_output
+python data_analyzer_path --input_dir $working_dir --output_dir $working_dir_output --job_name $job_name
 
 function move_output() {
 #    cd $SLURM_SUBMIT_DIR

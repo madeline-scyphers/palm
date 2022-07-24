@@ -95,6 +95,18 @@ def analyze_data(input_dir, output_dir, job_name):
     # data = {"1": r_cas[0], "2": r_cas[2]}
     data = {i + 1: str(r_ca) for i, r_ca in enumerate(r_cas)}
     file_path = output_dir / f"r_ca.json"
+
+    if file_path.exists():
+        temp_file = file_path
+        ext = file_path.suffix
+        file_name = file_path.stem
+        parent = file_path.parent
+        file_append = 1
+        while temp_file.exists():
+            temp_file = parent / f"{file_name}{file_append}{ext}"
+            file_append += 1
+        file_path = temp_file
+
     with open(file_path, "w") as f:
         print(f"writing out here: {file_path}")
         pprint(data)
