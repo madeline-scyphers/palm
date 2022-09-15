@@ -69,58 +69,48 @@ class Wrapper(BaseWrapper):
         ----------
         trial : BaseTrial
         """
-        try:
-            trial_config = copy.deepcopy(self.config)
-            job_name = zfilled_trial_index(trial.index)
-            job_output_dir = self.experiment_dir / job_name
-            job_output_dir.mkdir(parents=True)
+        trial_config = copy.deepcopy(self.config)
+        job_name = zfilled_trial_index(trial.index)
+        job_output_dir = self.experiment_dir / job_name
+        job_output_dir.mkdir(parents=True)
 
-            run_time = trial_config["model_options"]["output_end_time"] * trial_config["model_options"][
-                "palmrun_walltime_scalar"]
-            data_analyses_time = (
-                    (trial_config["model_options"]["output_end_time"] - trial_config["model_options"][
-                        "output_start_time"])
-                    * trial_config["model_options"]["data_analyse_walltime_scalar"])
-            trial_config_path = job_output_dir / "trial_config.yaml"
-            job_script_path = (job_output_dir / "slurm_job.sh").resolve()
+        run_time = trial_config["model_options"]["output_end_time"] * trial_config["model_options"][
+            "palmrun_walltime_scalar"]
+        data_analyses_time = (
+                (trial_config["model_options"]["output_end_time"] - trial_config["model_options"][
+                    "output_start_time"])
+                * trial_config["model_options"]["data_analyse_walltime_scalar"])
+        trial_config_path = job_output_dir / "trial_config.yaml"
+        job_script_path = (job_output_dir / "slurm_job.sh").resolve()
 
-            trial_config["parameters"] = trial.arm.parameters
-            trial_config["model_options"]["config_path"] = str(trial_config_path)
-            trial_config["model_options"]["job_script_path"] = str(job_script_path)
-            trial_config["model_options"]["job_name"] = job_name
-            trial_config["model_options"]["log_file"] = str(job_output_dir / f"{job_name}_%j.log")
-            trial_config["model_options"]["job_output_dir"] = str(job_output_dir)
-            trial_config["model_options"]["run_time"] = int(run_time)
-            trial_config["model_options"]["data_analyses_time"] = data_analyses_time
-            trial_config["model_options"]["batch_time"] = int(run_time + data_analyses_time)
+        trial_config["parameters"] = trial.arm.parameters
+        trial_config["model_options"]["config_path"] = str(trial_config_path)
+        trial_config["model_options"]["job_script_path"] = str(job_script_path)
+        trial_config["model_options"]["job_name"] = job_name
+        trial_config["model_options"]["log_file"] = str(job_output_dir / f"{job_name}_%j.log")
+        trial_config["model_options"]["job_output_dir"] = str(job_output_dir)
+        trial_config["model_options"]["run_time"] = int(run_time)
+        trial_config["model_options"]["data_analyses_time"] = data_analyses_time
+        trial_config["model_options"]["batch_time"] = int(run_time + data_analyses_time)
 
-            trial.update_run_metadata(
-                dict(trial_config_path=trial_config_path,
-                    job_script_path=job_script_path))
+        trial.update_run_metadata(
+            dict(trial_config_path=trial_config_path,
+                job_script_path=job_script_path))
 
-            with open(JOB_SCRIPT_PATH) as template:
-                job_script = template.read()
-            jinja_env = jinja2.Environment(
-                loader=jinja2.BaseLoader(),
-            )
-            template = jinja_env.from_string(job_script)
-            job_script = template.render(**trial_config["model_options"])
-            # job_script = job_script.format(**trial_config["model_options"])
+        with open(JOB_SCRIPT_PATH) as template:
+            job_script = template.read()
+        jinja_env = jinja2.Environment(
+            loader=jinja2.BaseLoader(),
+        )
+        template = jinja_env.from_string(job_script)
+        job_script = template.render(**trial_config["model_options"])
+        # job_script = job_script.format(**trial_config["model_options"])
 
-            with open(job_script_path, "w") as f:
-                f.write(job_script)
+        with open(job_script_path, "w") as f:
+            f.write(job_script)
 
-            with open(trial_config_path, 'w') as f:
-                yaml.dump(trial_config, f)
-        except Exception as e:
-            from pprint import pprint
-            pprint(trial_config["model_options"])
-            logging.exception(e)
-            logging.exception(traceback.format_exc())
-            print()
-            print()
-            print()
-            raise
+        with open(trial_config_path, 'w') as f:
+            yaml.dump(trial_config, f)
 
     def run_model(self, trial: Trial):
         """
@@ -130,22 +120,15 @@ class Wrapper(BaseWrapper):
         ----------
         trial : BaseTrial
         """
-        try:
-            trial_config = self._load_trial_config(trial)
+        trial_config = self._load_trial_config(trial)
 
-            job_script_path = trial_config["model_options"]["job_script_path"]
-            cmd = f"sbatch {job_script_path}"
+        job_script_path = trial_config["model_options"]["job_script_path"]
+        cmd = f"sbatch {job_script_path}"
 
-            args = cmd.split()
-            subprocess.Popen(
-                args, stdout=subprocess.PIPE, universal_newlines=True
-            )
-        except Exception as e:
-            logging.exception(e)
-            logging.exception(traceback.format_exc())
-            print()
-            print()
-            print()
+        args = cmd.split()
+        subprocess.Popen(
+            args, stdout=subprocess.PIPE, universal_newlines=True
+        )
 
     def set_trial_status(self, trial: Trial) -> None:
         """
