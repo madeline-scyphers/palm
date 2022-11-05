@@ -54,12 +54,17 @@ def get_wrapper_config(
     output_end_time=300,
     template_path=TEMPLATE_DIR,
     job_name=None,
+    _validate=True,
     **kwargs
 ):
-    _validate_config_constraints(ground_ratio, house_ratio, mean_lai, plot_footprint)
+    if _validate:
+        _validate_config_constraints(ground_ratio, house_ratio, mean_lai, plot_footprint)
     job_name = job_name if job_name is not None else dt.datetime.now().strftime("%Y%m%dT%H%M%S")
     plot_ratio = ground_ratio + house_ratio
-    house_plot_ratio = house_ratio / plot_ratio
+    try:
+        house_plot_ratio = house_ratio / plot_ratio
+    except ZeroDivisionError:
+        house_plot_ratio = 0
     config = {
         "job_name": job_name,
         "output_start_time": output_start_time,
@@ -74,19 +79,3 @@ def get_wrapper_config(
         "canopy": {"mean_lai": mean_lai},
     }
     return config
-#
-# # 94 = 366 * house_plot_ratio
-# house_plot_ratio = 94 / 366  = house_ratio / 0.6854319665580988
-# house_ratio = (94 / 366) * 0.6854319665580988
-#
-# plot_ratio = ground_ratio + house_ratio
-# house_plot_ratio = house_ratio / 0.6854319665580988
-#
-# {"job_name": "20220425T123452", "output_start_time": 21600,
-#  "output_end_time": 23400, "template_path": "/users/PAS0409/madelinescyphers/palm/palm_wrapper/job_submission/palm_config_template.txt",
-#  "domain": {"x": 96, "y": 216, "dx": 3, "dy": 3, "dz": 3, "urban_ratio": 0.5},
-#  "house": {"footprint": 94, "height": 2},
-#  "plot": {"plot_footprint": 366, "plot_ratio": 0.6854319665580988},
-#  "canopy": {"mean_lai": 3.1202627243474126}}
-#
-#

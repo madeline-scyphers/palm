@@ -651,15 +651,13 @@
 
        CASE ( 'before_timestep' )
 
-               ! IF ( simulated_time >= 18000.0_wp ) THEN
+            ! Add the scalar every time step
 
-                   DO  m = 1, surf_def_v(0)%ns
+            DO  m = 1, surf_def_v(0)%ns
 
-                        surf_def_v(0)%ssws(m) = 0.001
+               surf_def_v(0)%ssws(m) = 0.001
 
-                   ENDDO
-
-               ! ENDIF
+            ENDDO
 
 !
 !--       Enter actions to be done before every timestep here

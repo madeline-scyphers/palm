@@ -1,6 +1,7 @@
+from __future__ import annotations
+
 from abc import ABC, abstractmethod
 from typing import Optional
-from xml import dom
 
 import numpy as np
 import pandas as pd
@@ -169,31 +170,41 @@ class Domain(BaseDomainArea):
             string += f'{" ".join(str(int(pixel)) for pixel in row)}\n'
         return string
 
-    def get_matrix(self) -> np.ndarray:
-        houses_row = np.tile(
-            self.subplot.matrix,
-            (
-                self.temp_x // self.subplot.x,
-                1,
-            ),
-        )
-        number_of_house_rows = self.trimmed_y // self.subplot.y
+    def get_matrix(self) -> tuple[np.ndarray, np.ndarray]:
+        rows = []
         number_of_full_tree_rows = self.temp_y - self.trimmed_y - 1
-        mixed_row_ratio = self.temp_y * self.plot_ratio - self.trimmed_y
-
         tree_row = np.full((self.temp_x, 1), -1)
-        mixed_row = np.array(
-            [-1 if i <= mixed_row_ratio * self.temp_x else 0 for i in range(1, self.temp_x + 1)]
-        ).reshape(self.temp_x, 1)
+        if self.subplot.matrix.size:
+            houses_row = np.tile(
+                self.subplot.matrix,
+                (
+                    self.temp_x // self.subplot.x,
+                    1,
+                ),
+            )
+            number_of_house_rows = self.trimmed_y // self.subplot.y
+            mixed_row_ratio = self.temp_y * self.plot_ratio - self.trimmed_y
 
-        rows = [[houses_row.copy()] for _ in range(number_of_house_rows)]
+            mixed_row = np.array(
+                [-1 if i <= mixed_row_ratio * self.temp_x else 0 for i in range(1, self.temp_x + 1)]
+            ).reshape(self.temp_x, 1)
+            rows = [[houses_row.copy()] for _ in range(number_of_house_rows)]
+        else:
+            number_of_house_rows = 0
+            mixed_row = tree_row.copy()
+
         trees = [tree_row.copy() for _ in range(number_of_full_tree_rows)]
         trees.insert(number_of_house_rows // 2, mixed_row)
+
         while trees:
-            for row in rows:
-                if not trees:
-                    break
-                row.append(trees.pop())
+            if rows:
+                for row in rows:
+                    if not trees:
+                        break
+                    row.append(trees.pop())
+            else:
+                rows = [[tree] for tree in trees]
+                break
 
         domain_with_trees = np.concatenate([np.concatenate(row, axis=1) for row in rows], axis=1)
 
@@ -244,6 +255,12 @@ def setup_domain(cfg):
         dy,
         cfg["domain"]["y"],
     )
+    if cfg["plot"]["plot_ratio"] == 0:
+        house = House(0, 0, 0)
+        cell = Cell(house, 0, 0)
+        return Domain(cell, domain_x, domain_y, cfg["domain"]["x"], cfg["domain"]["y"], 0, plot_ratio, cfg["domain"]["stack_height"])
+
+    # house_x, house_y, new_domain_x, new_domain_y, urban_y
     tplot_x, tplot_y, tdomain_x, tdomain_y, trimmed_y = get_best_plot_size(plots, plot_footprint, plot_ratio, dx, dy)
     house_x, house_y = calc_house_size(tplot_x, tplot_y, cfg["house"]["footprint"], dx, dy)
 
@@ -255,6 +272,10 @@ def setup_domain(cfg):
 if __name__ == "__main__":
     from .load_wrapper_config import get_wrapper_config
 
-    config = get_wrapper_config()
+    config = get_wrapper_config(
+        ground_ratio=0,
+        house_ratio=0,
+        _validate=False
+    )
     domain = setup_domain(config)
     domain

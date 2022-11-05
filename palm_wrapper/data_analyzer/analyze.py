@@ -7,7 +7,7 @@ import dask
 import click
 import numpy as np
 
-from .analysis_utils import load_data_set
+from .analysis_utils import load_data_set, calc_temp_spac_means_interp
 
 dask.config.set({"array.chunk-size": "512 MiB"})
 
@@ -43,11 +43,11 @@ def analyze_data(input_dir, output_dir, job_name):
         config = json.load(f)
 
     dz = config["domain"]["dz"]
+    urban_ratio = config["domain"]["urban_ratio"]
 
-    data_3d_path = sorted(output_dir.glob("*3d*.nc"))[0]
-    data_pr_path = sorted(output_dir.glob("*pr*.nc"))[0]
+    data_3d_path = [*sorted(output_dir.glob("*3d.nc")), *sorted(output_dir.glob("*3d.*.nc"))][-1]
+
     ds_3d = load_data_set(data_3d_path)
-    ds_pr = load_data_set(data_pr_path)
     ds_3d = ds_3d.rename({"zu_3d": "z"})
 
     ds_3d = ds_3d.drop_isel(z=0, zw_3d=0, zpc_3d=0)
@@ -59,8 +59,6 @@ def analyze_data(input_dir, output_dir, job_name):
     ds_3d["zw_3d"] = ds_3d.z
 
     ds_3d = ds_3d.interp(xu=ds_3d.x, yv=ds_3d.y, zw_3d=ds_3d.z, zpc_3d=ds_3d.z)
-
-    urban_ratio = config["domain"]["urban_ratio"]
 
     y_domain1 = np.arange(0, int(ds_3d.s.y.size * urban_ratio))
     lai_vals1 = ds_3d.isel(y=y_domain1).pcm_lad.sum(dim="z").values
@@ -87,29 +85,30 @@ def analyze_data(input_dir, output_dir, job_name):
     ubar_z_scalar = ubar.isel(y=y_domain, z=z_scalar).mean(skipna=True)
     scalar_gradient = ds_3d.isel(y=y_domain, z=z_scalar).s.mean(skipna=True)
 
-    masks = [dim.split("_")[-1] for dim in ds_pr.dims.keys() if "zwu" in dim]
+    # calc ustar
+    TempSpacMeanU, TempSpacMeanV, TempSpacMeanW = calc_temp_spac_means_interp(ds_3d)
+    uw = (ds_3d.w - TempSpacMeanW) * (ds_3d.u - TempSpacMeanU)
+    vw = (ds_3d.w - TempSpacMeanW) * (ds_3d.v - TempSpacMeanV)
+    ustar = (uw.mean(dim=["x", "y"]) ** 2 + vw.mean(dim=["x", "y"]) ** 2) ** (1 / 4)
+    ustarProf = ustar.mean(dim="time", skipna=True)
+    ustar_bar = ustarProf.isel(z=z_scalar).mean()
 
-    r_cas = {}
-    for mask in masks:
+    r_a = ubar_z_scalar / (ustar_bar ** 2) + 6.2 / (ustar_bar ** (2 / 3))
+    Depos = DR.mean(skipna=True)
 
-        ds_pr = ds_pr.rename({f"zwv_{mask}": f"z_{mask}"})
-        ds_pr = ds_pr.drop_isel({f"z_{mask}": 0})
-        ds_pr = ds_pr.interp({f"zwu_{mask}": ds_pr[f"z_{mask}"]})
+    r_ca = (ustar_bar * lai * (scalar_gradient / Depos - r_a - 1 / (ustar_bar * lai))).compute()
 
-        ustar = (ds_pr[f"wu_{mask}"] ** 2 + ds_pr[f"wv_{mask}"] ** 2) ** (1 / 4)
-        ustar_bar = ustar.isel({f"z_{mask}": z_scalar}).mean()
+    r_cs = 1  # yazbeck, et all pg 9
 
-        r_a = ubar_z_scalar / (ustar_bar ** 2) + 6.2 / (ustar_bar ** (2 / 3))
-        Depos = DR.mean(skipna=True)
+    B_inv = r_cs / lai + r_ca / lai
 
-        r_ca = ustar_bar * lai * (scalar_gradient / Depos - r_a - 1 / (ustar_bar * lai)).compute()
-        r_cas[mask] = r_ca.values
-        print(f"r_ca value for mask {mask} = {r_ca.values}")
-    # print(r_ca.values)
-    # data = {"1": r_cas[0], "2": r_cas[2]}
-    data = {mask: str(r_ca) for mask, r_ca in r_cas.items()}
-    file_path = output_dir / f"r_ca.json"
 
+    data = {
+        "output": B_inv
+    }
+    file_path = output_dir / f"output.json"
+
+    # if filepath already exists append counter on it until it unique
     if file_path.exists():
         temp_file = file_path
         ext = file_path.suffix
@@ -125,10 +124,6 @@ def analyze_data(input_dir, output_dir, job_name):
         print(f"writing out here: {file_path}")
         pprint(data)
         json.dump(data, f)
-
-    # ustar_above_canopy = ustar.z > ds_lad.z.max()
-    # first_ustar_above = ustar.z[ustar_above_canopy][0]
-    # ustar_bar = ustar.sel(z=first_ustar_above).mean()
 
 
 if __name__ == "__main__":

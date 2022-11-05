@@ -12,53 +12,16 @@ import jinja2
 import numpy as np
 import yaml
 from ax import Trial
-from boa import BaseWrapper, load_yaml, get_trial_dir
-
-
-# TODO remove when added to boa
-def get_dt_now_as_str(fmt: str = "%Y%m%dT%H%M%S"):
-    return dt.datetime.now().strftime(fmt)
-
-# TODO remove when added to boa
-def zfilled_trial_index(trial_index: int, fill_size: int = 6) -> str:
-    """Return trial index left passed with zeros of length ``fill_size``"""
-    return str(trial_index).zfill(fill_size)
+from boa import BaseWrapper, load_yaml, get_trial_dir, zfilled_trial_index, get_dt_now_as_str
 
 
 JOB_SCRIPT_PATH = Path(__file__).resolve().parent / "batch_job_template.txt"
 
 
 class Wrapper(BaseWrapper):
-    def __init__(self):
-        self.config = None
-        self.model_settings = None
-        self.ex_settings = None
-        self.experiment_dir = None
-
-    def load_config(self, config_file: os.PathLike):
-        """
-        Load config file and return a dictionary # TODO finish this
-
-        Parameters
-        ----------
-        config_file : os.PathLike
-            File path for the experiment configuration file
-
-        Returns
-        -------
-        loaded_config: dict
-        """
-        config = load_yaml(config_file)
-        experiment_name = get_dt_now_as_str()
-        config["optimization_options"]["experiment"]["name"] = experiment_name
-
-        self.config = config
-        self.model_settings = self.config["model_options"]
-        self.ex_settings = self.config["optimization_options"]
-        self.experiment_dir = Path(self.model_settings["optimization_output_dir"]).expanduser() / experiment_name
-        self.experiment_dir.mkdir()
-        return self.config
-
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.paths_by_trial = {}
     def write_configs(self, trial: Trial) -> None:
         """
         This function is usually used to write out the configurations files used
@@ -93,9 +56,8 @@ class Wrapper(BaseWrapper):
         trial_config["model_options"]["data_analyses_time"] = data_analyses_time
         trial_config["model_options"]["batch_time"] = int(run_time + data_analyses_time)
 
-        trial.update_run_metadata(
-            dict(trial_config_path=trial_config_path,
-                job_script_path=job_script_path))
+        self.paths_by_trial[trial.index] = dict(trial_config_path=trial_config_path,
+                                                job_script_path=job_script_path)
 
         with open(JOB_SCRIPT_PATH) as template:
             job_script = template.read()
@@ -104,7 +66,6 @@ class Wrapper(BaseWrapper):
         )
         template = jinja_env.from_string(job_script)
         job_script = template.render(**trial_config["model_options"])
-        # job_script = job_script.format(**trial_config["model_options"])
 
         with open(job_script_path, "w") as f:
             f.write(job_script)
@@ -120,7 +81,7 @@ class Wrapper(BaseWrapper):
         ----------
         trial : BaseTrial
         """
-        trial_config = self._load_trial_config(trial)
+        trial_config = load_yaml(self.paths_by_trial[trial.index]["trial_config_path"], normalize=False)
 
         job_script_path = trial_config["model_options"]["job_script_path"]
         cmd = f"sbatch {job_script_path}"
@@ -152,7 +113,7 @@ class Wrapper(BaseWrapper):
         # TODO add sphinx link to ax trial status
 
         """
-        trial_config = self._load_trial_config(trial)
+        trial_config = load_yaml(self.paths_by_trial[trial.index]["trial_config_path"], normalize=False)
 
         log_file = Path(trial_config["model_options"]["log_file"])
 
@@ -193,15 +154,9 @@ class Wrapper(BaseWrapper):
         """
         trial_config = trial.run_metadata["trial_config_path"]
         job_output_dir = trial_config["model_options"]["job_output_dir"]
-        data_filepath = job_output_dir / "r_ca.json"
+        data_filepath = job_output_dir / "output.json"
 
         with open(data_filepath, 'r') as f:
             data = json.load(f)
-        r_ca = np.array(data["r_ca"])
-        return dict(a=r_ca)
-
-    @staticmethod
-    def _load_trial_config(trial: Trial):
-        trial_config_path = trial.run_metadata["trial_config_path"]
-        trial_config = load_yaml(trial_config_path, normalize=False)
-        return trial_config
+        output = np.array(data["output"])
+        return dict(a=output)
