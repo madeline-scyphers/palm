@@ -99,7 +99,7 @@ def read_experiment_config(config_file):
 def main(job_name, config_file, input_dir=None):
     config = load_yaml(config_file, normalize=False)
     model_options = config.get("model_options", {})
-    model_options["job_name"] == job_name
+    model_options["job_name"] = job_name
     params = config.get("parameters", {})
     input_dir = input_dir if input_dir is not None else Path(config["optimization_options"].get("input_dir", ""))
     wrapper_config = run_job(ex_settings=config["optimization_options"], input_dir=input_dir, **model_options, **params)
