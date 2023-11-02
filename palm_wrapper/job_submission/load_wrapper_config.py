@@ -57,8 +57,8 @@ def get_wrapper_config(
     _validate=True,
     **kwargs
 ):
-    if _validate:
-        _validate_config_constraints(ground_ratio, house_ratio, mean_lai, plot_footprint)
+    # if _validate:
+        # _validate_config_constraints(ground_ratio, house_ratio, mean_lai, plot_footprint)
     job_name = job_name if job_name is not None else dt.datetime.now().strftime("%Y%m%dT%H%M%S")
     plot_ratio = ground_ratio + house_ratio
     try:

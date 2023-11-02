@@ -15,9 +15,8 @@ working_dir_output=$working_dir/$job_name/OUTPUT
 job_output_dir={{ job_output_dir }}
 palm_wrapper_pkg_path={{ palm_wrapper_pkg_path }}
 config_writer_path=~/palm/palm_wrapper/main.py
-data_analyzer_path=~/palm/palm_wrapper/analyze_rca.py
+data_analyzer_path=~/palm/palm_wrapper/palm_wrapper/data_analyzer/analyze.py
 model_path={{ model_path }}
-io_config={{ io_config }}
 
 current_dir=`pwd`
 
@@ -32,18 +31,17 @@ ls $working_dir/$job_name
 
 cd $model_path
 
-palmrun -r $job_name -c default -X{{ nodes * ntasks_per_node }} -T{{ ntasks_per_node }} -q parallel -t $run_time -a ${io_config} -v -m 4315
+palmrun -r $job_name -c default -X{{ nodes * ntasks_per_node }} -T{{ ntasks_per_node }} -q parallel -t $run_time -a slurm -v -m 4315
 
 cd $current_dir
 
-python data_analyzer_path --input_dir $working_dir --output_dir $working_dir_output --job_name $job_name
+python $data_analyzer_path --input_dir $working_dir --output_dir $working_dir_output --job_name $job_name
 
 function move_output() {
 #    cd $SLURM_SUBMIT_DIR
-    job_output=$job_output_dir/output
-    mkdir -p $job_output
-    cp -R $working_dir_output/r_ca.json $job_output/r_ca.json
-    # cp -R $working_dir_output $job_output_dir/output
+    mkdir -p $job_output_dir
+    cp -R $working_dir_output/output.json $job_output_dir/output.json
+    #cp -R $working_dir_output $job_output_dir/output
     cp -R $working_dir $job_output_dir
   exit
 }

@@ -6,10 +6,9 @@ import dask
 
 import click
 import numpy as np
+import xarray as xr
 
-from .analysis_utils import load_data_set, calc_temp_spac_means_interp
 
-dask.config.set({"array.chunk-size": "512 MiB"})
 
 
 @click.command()
@@ -47,7 +46,7 @@ def analyze_data(input_dir, output_dir, job_name):
 
     data_3d_path = [*sorted(output_dir.glob("*3d.nc")), *sorted(output_dir.glob("*3d.*.nc"))][-1]
 
-    ds_3d = load_data_set(data_3d_path)
+    ds_3d = conload_data_set(data_3d_path)
     ds_3d = ds_3d.rename({"zu_3d": "z"})
 
     ds_3d = ds_3d.drop_isel(z=0, zw_3d=0, zpc_3d=0)
@@ -61,14 +60,14 @@ def analyze_data(input_dir, output_dir, job_name):
     ds_3d = ds_3d.interp(xu=ds_3d.x, yv=ds_3d.y, zw_3d=ds_3d.z, zpc_3d=ds_3d.z)
 
     y_domain1 = np.arange(0, int(ds_3d.s.y.size * urban_ratio))
-    lai_vals1 = ds_3d.isel(y=y_domain1).pcm_lad.sum(dim="z").values
+    lai_vals1 = ds_3d.isel(y=y_domain1).pcm_lad.sum(dim="z")
     lai1 = lai_vals1.mean() * dz
 
     y_domain2 = np.arange(ds_3d.s.y.size - int(ds_3d.s.y.size * urban_ratio), ds_3d.s.y.size)
-    lai_vals2 = ds_3d.isel(y=y_domain2).pcm_lad.sum(dim="z").values
+    lai_vals2 = ds_3d.isel(y=y_domain2).pcm_lad.sum(dim="z")
     lai2 = lai_vals2.mean() * dz
 
-    if lai1 >= lai2:
+    if lai1  >= lai2:
         y_domain = y_domain1
         lai = lai1
     else:
@@ -96,15 +95,33 @@ def analyze_data(input_dir, output_dir, job_name):
     r_a = ubar_z_scalar / (ustar_bar ** 2) + 6.2 / (ustar_bar ** (2 / 3))
     Depos = DR.mean(skipna=True)
 
+
+    lai = lai.compute()
+    ustar_bar = ustar_bar.compute()
+    ubar_z_scalar = ubar_z_scalar.compute()
+    scalar_gradient = scalar_gradient.compute()
+    Depos = Depos.compute()
+    r_a = r_a.compute()
     r_ca = (ustar_bar * lai * (scalar_gradient / Depos - r_a - 1 / (ustar_bar * lai))).compute()
+    print(f"{lai=}")
+    print(f"{ustar_bar=}")
+    print(f"{ubar_z_scalar=}")
+    print(f"{scalar_gradient=}")
+    print(f"{Depos=}")
+    print(f"{r_a=}")
+    print(f"{r_ca=}")
+
+
 
     r_cs = 1  # yazbeck, et all pg 9
 
     B_inv = r_cs / lai + r_ca / lai
 
+    print(f"{B_inv=}")
+
 
     data = {
-        "output": B_inv
+        "output": B_inv.values.tolist()
     }
     file_path = output_dir / f"output.json"
 
@@ -124,6 +141,31 @@ def analyze_data(input_dir, output_dir, job_name):
         print(f"writing out here: {file_path}")
         pprint(data)
         json.dump(data, f)
+
+
+def load_data_set(data_path, chunk=True):
+    if chunk:
+        ds = xr.open_dataset(data_path, chunks="auto")
+    else:
+        ds = xr.open_dataset(data_path)
+    # ds = ds.drop_isel(zu_3d=0, zw_3d=0)  # nan value
+    # ds = ds.reset_index(["zu_3d", "zw_3d"])
+    return ds
+
+
+def calc_temp_spac_means(ds):
+    TempSpacMeanU = ds.u.sum(dim=["xu", "y", "time"]) / (ds.x.size * ds.y.size * ds.time.size)
+    TempSpacMeanV = ds.v.sum(dim=["x", "yv", "time"]) / (ds.x.size * ds.y.size * ds.time.size)
+    TempSpacMeanW = ds.w.sum(dim=["x", "y", "time"]) / (ds.x.size * ds.y.size * ds.time.size)
+    return TempSpacMeanU, TempSpacMeanV, TempSpacMeanW
+
+
+def calc_temp_spac_means_interp(ds):
+    TempSpacMeanU = ds.u.sum(dim=["x", "y", "time"]) / (ds.x.size * ds.y.size * ds.time.size)
+    TempSpacMeanV = ds.v.sum(dim=["x", "y", "time"]) / (ds.x.size * ds.y.size * ds.time.size)
+    TempSpacMeanW = ds.w.sum(dim=["x", "y", "time"]) / (ds.x.size * ds.y.size * ds.time.size)
+    return TempSpacMeanU, TempSpacMeanV, TempSpacMeanW
+
 
 
 if __name__ == "__main__":

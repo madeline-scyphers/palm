@@ -12,7 +12,7 @@ import jinja2
 import numpy as np
 import yaml
 from ax import Trial
-from boa import BaseWrapper, load_yaml, get_trial_dir, zfilled_trial_index, get_dt_now_as_str
+from boa import BaseWrapper, load_yaml, zfilled_trial_index
 
 
 JOB_SCRIPT_PATH = Path(__file__).resolve().parent / "batch_job_template.txt"
@@ -46,15 +46,24 @@ class Wrapper(BaseWrapper):
         trial_config_path = job_output_dir / "trial_config.yaml"
         job_script_path = (job_output_dir / "slurm_job.sh").resolve()
 
+        model_options = trial_config["model_options"]
+
+        logging.info("\ntrial_config_path: \n%s", trial_config_path)
+        logging.info("\njob_script_path: \n%s", job_script_path)
+
+
         trial_config["parameters"] = trial.arm.parameters
-        trial_config["model_options"]["config_path"] = str(trial_config_path)
-        trial_config["model_options"]["job_script_path"] = str(job_script_path)
-        trial_config["model_options"]["job_name"] = job_name
-        trial_config["model_options"]["log_file"] = str(job_output_dir / f"{job_name}_%j.log")
-        trial_config["model_options"]["job_output_dir"] = str(job_output_dir)
-        trial_config["model_options"]["run_time"] = int(run_time)
-        trial_config["model_options"]["data_analyses_time"] = data_analyses_time
-        trial_config["model_options"]["batch_time"] = int(run_time + data_analyses_time)
+        model_options["config_path"] = str(trial_config_path)
+        model_options["job_script_path"] = str(job_script_path)
+        model_options["job_name"] = job_name
+        model_options["log_file"] = str(job_output_dir / f"{job_name}.log")
+        model_options["job_output_dir"] = str(job_output_dir)
+        model_options["run_time"] = int(run_time)
+        model_options["data_analyses_time"] = data_analyses_time
+        model_options["batch_time"] = int(run_time + data_analyses_time)
+
+        logging.info("\nlog_file path: \n%s", model_options["log_file"])
+        logging.info("\njob_out_dir: \n%s", trial_config["model_options"]["job_output_dir"])
 
         self.paths_by_trial[trial.index] = dict(trial_config_path=trial_config_path,
                                                 job_script_path=job_script_path)
@@ -152,8 +161,8 @@ class Wrapper(BaseWrapper):
             A dictionary with the keys matching the keys of the metric function
                 used in the objective
         """
-        trial_config = trial.run_metadata["trial_config_path"]
-        job_output_dir = trial_config["model_options"]["job_output_dir"]
+        trial_config = load_yaml(self.paths_by_trial[trial.index]["trial_config_path"], normalize=False)
+        job_output_dir = Path(trial_config["model_options"]["job_output_dir"])
         data_filepath = job_output_dir / "output.json"
 
         with open(data_filepath, 'r') as f:

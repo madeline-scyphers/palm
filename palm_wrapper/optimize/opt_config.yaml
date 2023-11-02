@@ -28,32 +28,39 @@ optimization_options:
         total_trials: 2
 
 parameters:
-    house_ratio:  # Ratio of urban area that is house (not ground, not trees)
-        type: range
-        bounds: [.1, .8]
+    output_start_time: 0
+    output_end_time: 1200
+    domain_x: 96
+    domain_y: 432
+    io_config: "slurm"  # '"slurm"' or '"d3#"' slurm runs in tmp directly, d3# runs in home directory and saves everything
+    row_width:  # Ratio of urban area that is house (not ground, not trees)
+        # type: int
+        # bounds: [0, 432]
+        type: fixed
+        value: 0
 
-    ground_ratio:  # Ratio of urban area that is ground (not house, not trees)
-        type: range
-        bounds: [.25, .8]
+    spacing_width:  # Ratio of urban area that is ground (not house, not trees)
+        # type: int
+        # bounds: [1, 432]
+        type: fixed
+        value: 0
 
-    plot_footprint:  # Size of a plot of land (area of a house and its ground it sits on)
-        type: range
-        bounds: [350, 950]
-
-    mean_lai:  # The mean LAI of the canopy. There will be random perturbations to this
+    lai:  # The mean LAI of the canopy. There will be random perturbations to this
         type: range
         bounds: [2.0, 6.0]
 
-parameter_constraints:
-    - ground_ratio + house_ratio <= 1
-    - ground_ratio + 1.6*house_ratio <= .6
+# parameter_constraints:
+#     - row_width + spacing_width <= 432
+
+script_options:
+    # run_model: sbatch slurm_launch_run_model.sh
+    run_model: julia run_model.jl
 
 model_options:
-    output_start_time: 0
-    output_end_time: 120
-    palmrun_walltime_scalar: 3
-    data_analyse_walltime_scalar: .3
-    io_config: '"slurm"'
+    # output_start_time: 0
+    # output_end_time: 1200
+    # palmrun_walltime_scalar: 3
+    # data_analyse_walltime_scalar: .3
     optimization_output_dir: "~/palm/output"
     working_dir: $TMPDIR
     palm_wrapper_pkg_path:  ~/palm/palm_wrapper
