@@ -1,28 +1,12 @@
-name: palm_wrapper
+name: palm-wrapper
 channels:
   - conda-forge
-  - defaults
+  - cf-staging
 dependencies:
-  - python=3.9
-  - pyyaml
-  - numpy
-  - pandas
-  - scipy
-  - xarray
-  - dask
-  - netCDF4
-  - bottleneck
-  - pytest
+  - python=3.11
+  - boa-framework==0.10.1
+  - click
   - black
   - isort
-  - jupyterlab
-  - jupyter
-  - numexpr
-  - pip
-  - pip:
-    - torch
-    - torchaudio
-    - torchvision
-    - ax-platform
-    - git+https://github.com/madeline-scyphers/boa.git
-    - Jinja2
+  - xarray
+  - netcdf4
