@@ -1,0 +1,62 @@
+{% set palm_run_t = 23400 %}
+{% set output_start_dt = 1800 %}
+{% set dt = load_py("datetime") %}
+{% set slurm_run_t = dt.timedelta(seconds=palm_run_t * 3) %}
+
+{% set max_parr = 20 %}
+objective:
+    metrics:
+        - name: scalar_concentration
+
+scheduler:
+    n_trials: 100
+    max_pending_trials: {{ max_parr }}
+    run_trials_in_batches: true
+    ttl_seconds_for_trials: {{ palm_run_t * 2 }}
+generation_strategy:
+    steps:
+        # Other options are possible, see Ax GenerationStrategy
+        # for more information
+        -   model: SOBOL
+            num_trials: 20
+            max_parallelism: {{ max_parr }}
+        -   model: GPEI
+            num_trials: -1
+            max_parallelism: {{ max_parr }}
+
+parameters:
+    output_start_time: {{ palm_run_t - output_start_dt }}  # 6 hours
+    output_end_time: {{ palm_run_t }}  # 6.5 hours
+    domain_x: 96
+    domain_y: 432
+    io_config: "slurm"  # '"slurm"' or '"d3#"' slurm runs in tmp directly, d3# runs in home directory and saves everything
+    # io_config: d3#  # '"slurm"' or '"d3#"' slurm runs in tmp directly, d3# runs in home directory and saves everything
+    row_width:  # Ratio of urban area that is house (not ground, not trees)
+        type: range
+        bounds: [1, 100]
+        value_type: int
+        # type: fixed
+        # value: 220
+
+    spacing_width:  # Ratio of urban area that is ground (not house, not trees)
+        type: range
+        bounds: [1, 100]
+        value_type: int
+        # type: fixed
+        # value: 55
+
+    lai:  # The mean LAI of the canopy. There will be random perturbations to this
+        type: range
+        bounds: [2.0, 6.0]
+        # type: fixed
+        # value: 2.65631590411067
+
+parameter_constraints:
+    - row_width + spacing_width <= 432
+
+script_options:
+    # exp_name: palm_test_exit_codes
+    exp_name: palm_w_{{ max_parr }}_parr_{{ palm_run_t }}_t
+    # run_model: sbatch slurm_launch_run_model.sh
+    # run_model: julia run_model.jl
+    run_model: sbatch --time={{ slurm_run_t }} palm_slurm.sh {{ palm_run_t * 1.5|int}} {{ io_config }}
